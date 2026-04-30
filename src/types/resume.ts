@@ -77,6 +77,5 @@ export interface ResumeData {
   contact: ContactLink[];
   meta: {
     updatedAt: string;
-    version: number;
   };
 }

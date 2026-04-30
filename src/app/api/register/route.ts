@@ -55,13 +55,12 @@ export async function POST(req: NextRequest) {
     projectsDetailed: [],
     skills: [],
     contact: [],
-    meta: { updatedAt: new Date().toISOString(), version: 1 },
+    meta: { updatedAt: new Date().toISOString() },
   };
 
   const { error: insertErr } = await supabaseAnon.from("cv_resumes").insert({
     username: handle,
     data: resume,
-    version: 1,
     updated_at: resume.meta.updatedAt,
   });
 

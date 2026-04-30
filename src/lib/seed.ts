@@ -277,6 +277,5 @@ export const SEED_RESUME: ResumeData = {
   ],
   meta: {
     updatedAt: new Date("2026-05-01").toISOString(),
-    version: 1,
   },
 };
