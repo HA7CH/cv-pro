@@ -54,9 +54,10 @@ export default function RegisterFlow() {
 
   if (result) {
     const cliPrompt =
-      `Update my resume at ai-cv.ha7ch.com using the aicv CLI.\n` +
-      `CLI: npx ai-cv@latest\n` +
-      `CV_TOKEN=${result.token}`;
+      `Update my resume at ai-cv.ha7ch.com.\n\n` +
+      `Run first: npx ai-cv@latest login ${result.token}\n\n` +
+      `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
+      `Run npx ai-cv@latest --help if needed. Ask if unclear.`;
 
     const mcpCmd =
       `claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \\\n` +

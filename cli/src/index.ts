@@ -86,8 +86,14 @@ async function main() {
   }
 
   if (cmd === "whoami") {
-    console.log(`@${config.handle}`);
-    console.log(`Page: ${config.apiBase}/${config.handle}`);
+    let handle = config.handle;
+    if (!handle) {
+      const user = await whoami(config);
+      if (!user) die("Token invalid or server unreachable.");
+      handle = user.username;
+    }
+    console.log(`@${handle}`);
+    console.log(`Page: ${config.apiBase}/${handle}`);
     return;
   }
 

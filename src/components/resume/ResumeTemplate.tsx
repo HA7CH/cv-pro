@@ -6,12 +6,21 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
       {/* Header */}
       <header className="mb-8">
         <h1 className="font-serif text-4xl">{data.header.name}</h1>
+        {data.header.tagline && (
+          <p className="mt-1 text-zinc-600">{data.header.tagline}</p>
+        )}
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-500">
           {data.personalInfo.email && (
             <a href={`mailto:${data.personalInfo.email}`} className="hover:text-zinc-900">
               {data.personalInfo.email}
             </a>
           )}
+          {data.personalInfo.phone && (
+            <a href={`tel:${data.personalInfo.phone}`} className="hover:text-zinc-900">
+              {data.personalInfo.phone}
+            </a>
+          )}
+          {data.personalInfo.location && <span>{data.personalInfo.location}</span>}
           {data.personalInfo.pronouns && <span>{data.personalInfo.pronouns}</span>}
           {data.personalInfo.mbti && <span>{data.personalInfo.mbti}</span>}
           {data.personalInfo.birthday && <span>b. {data.personalInfo.birthday}</span>}

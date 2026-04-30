@@ -41,15 +41,17 @@ export interface ContactLink {
 }
 
 export interface PersonalInfo {
+  email: string;
+  phone?: string;
+  location?: string;
   pronouns?: string;
   mbti?: string;
   birthday?: string;
-  email: string;
 }
 
 export interface ResumeData {
   username: string;
-  header: { name: string };
+  header: { name: string; tagline?: string };
   personalInfo: PersonalInfo;
   experience: WorkExperience[];
   education: Education[];

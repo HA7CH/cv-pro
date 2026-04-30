@@ -1,6 +1,6 @@
 {
   "name": "ai-cv",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "AI-native resume CLI — update your living resume at ai-cv.ha7ch.com from Claude Code or any terminal",
   "homepage": "https://ai-cv.ha7ch.com",
   "repository": "https://github.com/LAWTED/ai-cv",
