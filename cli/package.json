@@ -1,0 +1,26 @@
+{
+  "name": "cvhatch",
+  "version": "0.1.0",
+  "description": "CLI for cv.ha7ch.com — update your living resume from the terminal or Claude Code",
+  "homepage": "https://cv.ha7ch.com",
+  "repository": "https://github.com/LAWTED/cv",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "cv": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5",
+    "tsx": "^4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

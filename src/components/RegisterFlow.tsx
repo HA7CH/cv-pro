@@ -53,10 +53,7 @@ export default function RegisterFlow() {
     }
 
     const saved: SavedData = { handle: data.handle, token: data.token };
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(saved));
-    } catch {}
-
+    try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
     setResult(saved);
     setStep("success");
   }
@@ -75,11 +72,19 @@ export default function RegisterFlow() {
   }
 
   if (step === "success" && result) {
-    const mcpCmd = `claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \\\n  --header "Authorization: Bearer ${result.token}"`;
+    const cliPrompt =
+      `请你用 npx cvhatch 帮我更新简历：\n` +
+      `1. npx cvhatch help — 查看文档\n` +
+      `2. npx cvhatch login ${result.token}\n` +
+      `3. 读取我这份 PDF，提取简历信息，调用 npx cvhatch update 更新到 cv.ha7ch.com`;
+
+    const mcpCmd =
+      `claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \\\n` +
+      `  --header "Authorization: Bearer ${result.token}"`;
 
     return (
       <div className="space-y-8">
-        {/* Handle claim */}
+        {/* Claim */}
         <div className="rounded-xl border border-green-200 bg-green-50 p-5">
           <p className="text-sm font-semibold text-green-900">
             ✓ cv.ha7ch.com/{result.handle} is yours
@@ -94,28 +99,42 @@ export default function RegisterFlow() {
 
         {/* Token */}
         <div>
-          <p className="mb-2 text-sm font-medium text-zinc-700">Your token</p>
+          <p className="mb-1.5 text-sm font-medium text-zinc-700">Your token</p>
           <CodeBlock value={result.token} id="token" copied={copied} onCopy={copy} />
         </div>
 
-        {/* MCP connect */}
+        {/* Primary: CLI prompt */}
         <div>
-          <p className="mb-2 text-sm font-medium text-zinc-700">
-            Connect to Claude Code — run this once in your terminal:
+          <p className="mb-1 text-sm font-semibold text-zinc-800">
+            Use it in Claude Code
           </p>
-          <CodeBlock value={mcpCmd} id="mcp" copied={copied} onCopy={copy} />
+          <p className="mb-2 text-sm text-zinc-500">
+            Copy this prompt into Claude Code — no setup, no restart needed:
+          </p>
+          <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} />
           <p className="mt-2 text-xs text-zinc-400">
-            Restart Claude Code after adding the MCP server.
+            Claude will install the CLI automatically, log in, and update your resume from the PDF.
           </p>
         </div>
 
-        {/* Usage */}
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-4">
-          <p className="text-sm font-medium text-zinc-700">Then just say:</p>
-          <blockquote className="mt-1.5 font-mono text-sm italic text-zinc-600">
-            Update my resume with this PDF.
-          </blockquote>
-          <p className="mt-4 text-sm text-zinc-500">
+        {/* Secondary: MCP */}
+        <details className="group">
+          <summary className="cursor-pointer list-none text-sm text-zinc-400 hover:text-zinc-600">
+            <span className="group-open:hidden">▸ </span>
+            <span className="hidden group-open:inline">▾ </span>
+            Prefer MCP (for repeated use)
+          </summary>
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-zinc-500">
+              Run once in your terminal, then restart Claude Code:
+            </p>
+            <CodeBlock value={mcpCmd} id="mcp" copied={copied} onCopy={copy} />
+          </div>
+        </details>
+
+        {/* Live page */}
+        <div className="border-t border-zinc-100 pt-5">
+          <p className="text-sm text-zinc-500">
             Your live page:{" "}
             <Link
               href={`/${result.handle}`}
@@ -183,7 +202,7 @@ function CodeBlock({
 }) {
   return (
     <div className="relative">
-      <pre className="overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 pr-20 font-mono text-sm leading-relaxed text-zinc-800">
+      <pre className="overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 pr-20 font-mono text-sm leading-relaxed text-zinc-800 whitespace-pre-wrap">
         <code>{value}</code>
       </pre>
       <button
