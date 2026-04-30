@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServiceClient } from "@/lib/supabase/server";
+import { supabaseAnon } from "@/lib/supabase/client";
 import { createPat } from "@/lib/pat";
 import { SEED_RESUME } from "@/lib/seed";
 import type { ResumeData } from "@/types/resume";
@@ -31,10 +31,8 @@ export async function POST(req: NextRequest) {
   const err = validateHandle(handle);
   if (err) return NextResponse.json({ error: err }, { status: 422 });
 
-  const client = getServiceClient();
-
   // check uniqueness
-  const { data: existing } = await client
+  const { data: existing } = await supabaseAnon
     .from("cv_resumes")
     .select("username")
     .eq("username", handle)
@@ -54,7 +52,7 @@ export async function POST(req: NextRequest) {
     meta: { updatedAt: new Date().toISOString(), version: 1 },
   };
 
-  const { error: insertErr } = await client.from("cv_resumes").insert({
+  const { error: insertErr } = await supabaseAnon.from("cv_resumes").insert({
     username: handle,
     data: resume,
     version: 1,
