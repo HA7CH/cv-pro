@@ -6,7 +6,7 @@ import { whoami, getResume, putResume, patchSection } from "./api.js";
 const VERSION = "0.1.0";
 
 const HELP = `
-cvhatch — living resume CLI  (cv.ha7ch.com)
+aicv — living resume CLI  (cv.ha7ch.com)
 
 USAGE
   cv <command> [options]

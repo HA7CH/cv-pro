@@ -73,10 +73,11 @@ export default function RegisterFlow() {
 
   if (step === "success" && result) {
     const cliPrompt =
-      `请你用 npx cvhatch 帮我更新简历：\n` +
-      `1. npx cvhatch help — 查看文档\n` +
-      `2. npx cvhatch login ${result.token}\n` +
-      `3. 读取我这份 PDF，提取简历信息，调用 npx cvhatch update 更新到 cv.ha7ch.com`;
+      `请你用 @lawtedwu/aicv CLI 帮我更新简历，token 是 ${result.token}。\n` +
+      `步骤：\n` +
+      `1. npx @lawtedwu/aicv help\n` +
+      `2. 读取我附上的 PDF，提取简历数据\n` +
+      `3. CV_TOKEN=${result.token} npx @lawtedwu/aicv update`;
 
     const mcpCmd =
       `claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \\\n` +

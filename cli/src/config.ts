@@ -5,20 +5,22 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 const CONFIG_DIR = join(homedir(), ".cv");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 
-interface Config {
+export interface Config {
   token: string;
-  handle: string;
+  handle?: string;
   apiBase: string;
 }
 
 export const DEFAULT_API = "https://cv.ha7ch.com";
 
 export function loadConfig(): Config | null {
-  // env var takes precedence
   const envToken = process.env.CV_TOKEN;
-  const envHandle = process.env.CV_HANDLE;
-  if (envToken && envHandle) {
-    return { token: envToken, handle: envHandle, apiBase: process.env.CV_API ?? DEFAULT_API };
+  if (envToken) {
+    return {
+      token: envToken,
+      handle: process.env.CV_HANDLE,
+      apiBase: process.env.CV_API ?? DEFAULT_API,
+    };
   }
   if (!existsSync(CONFIG_FILE)) return null;
   try {
@@ -34,7 +36,5 @@ export function saveConfig(config: Config): void {
 }
 
 export function clearConfig(): void {
-  if (existsSync(CONFIG_FILE)) {
-    writeFileSync(CONFIG_FILE, "{}", "utf8");
-  }
+  if (existsSync(CONFIG_FILE)) writeFileSync(CONFIG_FILE, "{}", "utf8");
 }
