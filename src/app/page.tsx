@@ -11,8 +11,8 @@ export default function Home() {
       </div>
 
       <footer className="mt-14 text-xs text-muted-foreground">
-        <a href="https://github.com/LAWTED/aicv" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
-          github.com/LAWTED/aicv
+        <a href="https://github.com/LAWTED/ai-cv" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+          github.com/LAWTED/ai-cv
         </a>
       </footer>
     </main>
