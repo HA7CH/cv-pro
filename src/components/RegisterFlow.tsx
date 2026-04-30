@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Check, Copy, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface SavedData { handle: string; token: string }
-type Mode = "cli" | "mcp";
 const LS_KEY = "cv_registration";
 
 export default function RegisterFlow() {
   const [handle, setHandle] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<SavedData | null>(null);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [mode, setMode] = useState<Mode>("cli");
+  const [error, setError] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,18 +32,18 @@ export default function RegisterFlow() {
     const h = handle.toLowerCase().trim();
     if (!h) return;
     setLoading(true);
-    setErrorMsg("");
+    setError("");
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ handle: h }),
     });
     const data = await res.json();
-    if (!res.ok) { setLoading(false); setErrorMsg(data.error ?? "Error"); return; }
+    setLoading(false);
+    if (!res.ok) { setError(data.error ?? "Error"); return; }
     const saved = { handle: data.handle, token: data.token };
     try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
     setResult(saved);
-    setLoading(false);
   }
 
   function copy(text: string, key: string) {
@@ -62,70 +64,56 @@ export default function RegisterFlow() {
 
     return (
       <div className="space-y-6">
-        {/* Handle */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-zinc-500">
-            <span className="font-medium text-zinc-900">cv.ha7ch.com/{result.handle}</span>
-            {" "}is yours
+        {/* Claimed handle */}
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">
+            <span className="font-medium text-foreground">cv.ha7ch.com/{result.handle}</span>{" "}
+            is yours
           </span>
           <button
             onClick={() => { try { localStorage.removeItem(LS_KEY); } catch {} setResult(null); setHandle(""); }}
-            className="text-xs text-zinc-400 hover:text-zinc-600"
+            className="text-xs text-muted-foreground hover:text-foreground"
           >
             switch handle
           </button>
         </div>
 
         {/* Token */}
-        <div>
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-zinc-400">Token</p>
-          <Code value={result.token} id="token" copied={copied} onCopy={copy} />
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Token</p>
+          <CodeBlock value={result.token} id="token" copied={copied} onCopy={copy} />
         </div>
 
-        {/* Switcher + content */}
-        <div>
-          <div className="mb-4 flex w-fit rounded-lg border border-zinc-200 bg-zinc-50 p-0.5">
-            {(["cli", "mcp"] as Mode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                  mode === m
-                    ? "bg-white text-zinc-900 shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-700"
-                }`}
-              >
-                {m.toUpperCase()}
-              </button>
-            ))}
-          </div>
+        {/* Tabs */}
+        <Tabs defaultValue="cli">
+          <TabsList className="w-fit">
+            <TabsTrigger value="cli">CLI</TabsTrigger>
+            <TabsTrigger value="mcp">MCP</TabsTrigger>
+          </TabsList>
 
-          {mode === "cli" && (
-            <div className="space-y-2">
-              <Code value={cliPrompt} id="cli" copied={copied} onCopy={copy} />
-              <p className="text-xs text-zinc-400">
-                Paste into Claude Code. It installs the CLI and updates your resume — PDF, text, or just describe the change.
-              </p>
-            </div>
-          )}
+          <TabsContent value="cli" className="mt-4 space-y-2">
+            <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} />
+            <p className="text-xs text-muted-foreground">
+              Paste into Claude Code — works with PDF, text, or plain conversation.
+            </p>
+          </TabsContent>
 
-          {mode === "mcp" && (
-            <div className="space-y-2">
-              <Code value={mcpCmd} id="mcp" copied={copied} onCopy={copy} />
-              <p className="text-xs text-zinc-400">
-                Run once in your terminal, then restart Claude Code.
-              </p>
-            </div>
-          )}
-        </div>
+          <TabsContent value="mcp" className="mt-4 space-y-2">
+            <CodeBlock value={mcpCmd} id="mcp" copied={copied} onCopy={copy} />
+            <p className="text-xs text-muted-foreground">
+              Run once in your terminal, then restart Claude Code.
+            </p>
+          </TabsContent>
+        </Tabs>
 
         {/* Live page */}
         <Link
           href={`/${result.handle}`}
           target="_blank"
-          className="inline-block text-sm text-zinc-500 hover:text-zinc-900"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          cv.ha7ch.com/{result.handle} ↗
+          cv.ha7ch.com/{result.handle}
+          <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
     );
@@ -133,47 +121,49 @@ export default function RegisterFlow() {
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-muted-foreground">
         Your resume will live at{" "}
-        <span className="font-mono text-zinc-900">cv.ha7ch.com/{handle || "handle"}</span>
+        <span className="font-mono text-foreground">cv.ha7ch.com/{handle || "handle"}</span>
       </p>
       <div className="flex gap-2">
-        <input
+        <Input
           value={handle}
-          onChange={(e) => { setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); setErrorMsg(""); }}
+          onChange={(e) => { setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); setError(""); }}
           placeholder="your-handle"
           maxLength={30}
           required
           autoFocus
-          className="flex-1 rounded-lg border border-zinc-300 px-4 py-2.5 font-mono text-sm outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+          className="font-mono"
         />
-        <button
-          type="submit"
-          disabled={loading || !handle}
-          className="rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40 hover:bg-zinc-700 transition-colors"
-        >
+        <Button type="submit" disabled={loading || !handle}>
           {loading ? "…" : "Get token →"}
-        </button>
+        </Button>
       </div>
-      {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </form>
   );
 }
 
-function Code({ value, id, copied, onCopy }: {
-  value: string; id: string; copied: string | null; onCopy: (t: string, k: string) => void;
+function CodeBlock({ value, id, copied, onCopy }: {
+  value: string;
+  id: string;
+  copied: string | null;
+  onCopy: (t: string, k: string) => void;
 }) {
+  const isCopied = copied === id;
   return (
     <div className="relative">
-      <pre className="overflow-x-auto rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 pr-16 font-mono text-sm leading-relaxed text-zinc-800 whitespace-pre-wrap">
+      <pre className="overflow-x-auto rounded-md border bg-muted px-4 py-3 pr-14 font-mono text-sm leading-relaxed whitespace-pre-wrap">
         <code>{value}</code>
       </pre>
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-1.5 top-1.5 h-7 w-7 text-muted-foreground hover:text-foreground"
         onClick={() => onCopy(value, id)}
-        className="absolute right-2 top-2 rounded bg-white px-2 py-1 text-xs font-medium text-zinc-600 shadow-sm ring-1 ring-zinc-200 hover:bg-zinc-50"
       >
-        {copied === id ? "✓" : "Copy"}
-      </button>
+        {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+      </Button>
     </div>
   );
 }
