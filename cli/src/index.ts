@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
 import { register, whoami, getResume, putResume, patchSection } from "./api.js";
 
-const VERSION = "0.1.0";
+const VERSION = "0.2.4";
 
 const HELP = `
 aicv — AI-native resume CLI  (ai-cv.ha7ch.com)
