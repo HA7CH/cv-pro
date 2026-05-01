@@ -10,8 +10,10 @@ function hashToken(token: string): string {
   return createHmac("sha256", secret).update(token).digest("hex");
 }
 
+// LLM-safe: hex avoids 0/O, l/I/1, _/- confusion when an agent has to retype a token.
+// 20 bytes = 160 bits of entropy, more than enough for a PAT.
 function generateRawToken(): string {
-  return PAT_PREFIX + randomBytes(24).toString("base64url");
+  return PAT_PREFIX + randomBytes(20).toString("hex");
 }
 
 export async function createPat(
