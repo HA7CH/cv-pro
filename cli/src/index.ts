@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
-import { whoami, getResume, putResume, patchSection } from "./api.js";
+import { register, whoami, getResume, putResume, patchSection } from "./api.js";
 
 const VERSION = "0.1.0";
 
@@ -12,7 +12,8 @@ USAGE
   ai-cv <command> [options]
 
 COMMANDS
-  login <token>               Save your personal access token
+  register <handle>           Claim a handle and get a token (no browser needed)
+  login <token>               Save an existing personal access token
   logout                      Remove saved credentials
   whoami                      Show authenticated handle
   get                         Print current resume as JSON
@@ -25,7 +26,7 @@ SECTIONS
   projectsRecent, projectsDetailed, skills, contact
 
 EXAMPLES
-  ai-cv login cv_pat_xxxxxxxxxx
+  ai-cv register lawted
   ai-cv whoami
   ai-cv get
   ai-cv update resume.json
@@ -49,6 +50,20 @@ async function main() {
 
   if (cmd === "--version" || cmd === "-v") {
     console.log(VERSION);
+    return;
+  }
+
+  // register
+  if (cmd === "register") {
+    const handle = args[1]?.toLowerCase().trim();
+    if (!handle) die("Usage: ai-cv register <handle>");
+    process.stdout.write(`Registering @${handle}… `);
+    const apiBase = process.env.CV_API ?? DEFAULT_API;
+    const result = await register(handle, apiBase);
+    console.log("✓");
+    saveConfig({ token: result.token, handle: result.handle, apiBase });
+    console.log(`Logged in as @${result.handle}`);
+    console.log(`Page: ${apiBase}/${result.handle}`);
     return;
   }
 

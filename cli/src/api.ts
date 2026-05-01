@@ -20,6 +20,21 @@ async function req(
   return res;
 }
 
+export async function register(
+  handle: string,
+  apiBase: string,
+): Promise<{ handle: string; token: string }> {
+  const url = `${apiBase}/api/register`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ handle }),
+  });
+  const data = await res.json() as { handle?: string; token?: string; error?: string };
+  if (!res.ok) throw new Error(data.error ?? res.statusText);
+  return { handle: data.handle!, token: data.token! };
+}
+
 export async function whoami(cfg: AuthConfig): Promise<{ username: string } | null> {
   const res = await req(cfg, "/api/v1/resume");
   if (res.status === 404) return null;
