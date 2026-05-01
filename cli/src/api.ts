@@ -35,12 +35,19 @@ export async function register(
   return { handle: data.handle!, token: data.token! };
 }
 
-export async function whoami(cfg: AuthConfig): Promise<{ username: string } | null> {
+export type WhoamiResult =
+  | { ok: true; username: string }
+  | { ok: false; reason: "no-resume" | "unauthorized" | "error" };
+
+export async function whoami(cfg: AuthConfig): Promise<WhoamiResult> {
   const res = await req(cfg, "/api/v1/resume");
-  if (res.status === 404) return null;
-  if (!res.ok) return null;
+  if (res.status === 404) return { ok: false, reason: "no-resume" };
+  if (res.status === 401 || res.status === 403) {
+    return { ok: false, reason: "unauthorized" };
+  }
+  if (!res.ok) return { ok: false, reason: "error" };
   const data = await res.json();
-  return { username: data.username };
+  return { ok: true, username: data.username };
 }
 
 export async function getResume(cfg: AuthConfig) {

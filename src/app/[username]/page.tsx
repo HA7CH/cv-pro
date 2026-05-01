@@ -87,7 +87,9 @@ export default async function UserResumePage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
+        }}
       />
       <ResumeTemplate data={resume} />
     </>

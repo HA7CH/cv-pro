@@ -72,10 +72,7 @@ function mcpCommand(client: McpClient, token: string): string {
       `  --header "Authorization: Bearer ${token}"`
     );
   }
-  if (client === "cursor") {
-    return `// ~/.cursor/mcp.json\n${json}`;
-  }
-  return `// ~/.codex/config.json\n${json}`;
+  return json;
 }
 
 export default function RegisterFlow() {

@@ -80,10 +80,16 @@ async function main() {
     // verify token by calling whoami
     const cfg = { token, apiBase: DEFAULT_API };
     process.stdout.write("Verifying token… ");
-    const user = await whoami(cfg);
-    if (!user) die("\nInvalid token or server error.");
-    console.log(`✓\nLogged in as @${user.username}`);
-    saveConfig({ token, handle: user.username, apiBase: DEFAULT_API });
+    const result = await whoami(cfg);
+    if (!result.ok) {
+      if (result.reason === "no-resume") {
+        die("\nToken valid, but no resume on file. Run: ai-cv register <handle>");
+      }
+      if (result.reason === "unauthorized") die("\nInvalid token.");
+      die("\nServer error. Try again.");
+    }
+    console.log(`✓\nLogged in as @${result.username}`);
+    saveConfig({ token, handle: result.username, apiBase: DEFAULT_API });
     return;
   }
 
@@ -103,9 +109,15 @@ async function main() {
   if (cmd === "whoami") {
     let handle = config.handle;
     if (!handle) {
-      const user = await whoami(config);
-      if (!user) die("Token invalid or server unreachable.");
-      handle = user.username;
+      const result = await whoami(config);
+      if (!result.ok) {
+        if (result.reason === "unauthorized") die("Invalid token.");
+        if (result.reason === "no-resume") {
+          die("Token valid, but no resume on file. Run: ai-cv register <handle>");
+        }
+        die("Server unreachable.");
+      }
+      handle = result.username;
     }
     console.log(`@${handle}`);
     console.log(`Page: ${config.apiBase}/${handle}`);
