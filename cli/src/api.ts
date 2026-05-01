@@ -3,6 +3,24 @@ interface AuthConfig {
   apiBase: string;
 }
 
+// Some hosted AI agents (Claude Code Cloud, ChatGPT Code Interpreter)
+// run inside sandboxes whose egress proxy denies arbitrary hosts and
+// returns 403 with `x-deny-reason: host_not_allowed` BEFORE the request
+// reaches our server. Surface this clearly instead of letting it look
+// like an auth failure.
+function checkEgressBlock(cfg: AuthConfig, res: Response): void {
+  if (res.status !== 403) return;
+  const denyReason = res.headers.get("x-deny-reason");
+  if (denyReason !== "host_not_allowed") return;
+  throw new Error(
+    `Sandbox blocked egress to ${cfg.apiBase} (x-deny-reason: host_not_allowed).\n` +
+      `This environment cannot reach ai-cv. Workarounds:\n` +
+      `  • Run from local Claude Code (CLI on your own machine)\n` +
+      `  • Use claude.ai with a Custom Connector → https://ai-cv.ha7ch.com/api/mcp\n` +
+      `  • Ask the agent host to allowlist ai-cv.ha7ch.com`,
+  );
+}
+
 async function req(
   cfg: AuthConfig,
   path: string,
@@ -17,6 +35,7 @@ async function req(
       ...(opts.headers ?? {}),
     },
   });
+  checkEgressBlock(cfg, res);
   return res;
 }
 
@@ -30,6 +49,7 @@ export async function register(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ handle }),
   });
+  checkEgressBlock({ token: "", apiBase }, res);
   const data = await res.json() as { handle?: string; token?: string; error?: string };
   if (!res.ok) throw new Error(data.error ?? res.statusText);
   return { handle: data.handle!, token: data.token! };

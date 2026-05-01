@@ -99,6 +99,10 @@ claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
 
 Tools: `get_resume` · `update_resume` · `update_section`
 
+## Troubleshooting
+
+**Sandboxed agents fail to connect.** Some hosted AI agents (Claude Code Cloud, ChatGPT Code Interpreter, etc.) run inside an egress allowlist that blocks `ai-cv.ha7ch.com`. The CLI surfaces this as `Sandbox blocked egress to ... (host_not_allowed)`. There is no client-side workaround — run from local Claude Code, or attach the MCP server (`/api/mcp`) as a Custom Connector on claude.ai, which uses a different egress.
+
 ## Links
 
 - Site: [ai-cv.ha7ch.com](https://ai-cv.ha7ch.com)
