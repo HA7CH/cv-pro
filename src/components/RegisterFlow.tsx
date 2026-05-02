@@ -6,6 +6,13 @@ import { Check, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface SavedData { handle: string; token: string }
@@ -13,66 +20,50 @@ const LS_KEY = "cv_registration";
 
 type McpClient = "claude" | "cursor" | "codex";
 
-const MCP_CLIENTS: { id: McpClient; label: string; icon: React.ReactNode }[] = [
+const MCP_CLIENTS: { id: McpClient; label: string; icon: string }[] = [
   {
     id: "claude",
     label: "Claude Code",
-    icon: (
-      <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
-        {/* Anthropic logo — 6 rounded bars radiating from center */}
-        <rect x="11" y="2" width="2" height="7" rx="1" />
-        <rect x="11" y="15" width="2" height="7" rx="1" />
-        <rect x="11" y="2" width="2" height="7" rx="1" transform="rotate(60 12 12)" />
-        <rect x="11" y="15" width="2" height="7" rx="1" transform="rotate(60 12 12)" />
-        <rect x="11" y="2" width="2" height="7" rx="1" transform="rotate(120 12 12)" />
-        <rect x="11" y="15" width="2" height="7" rx="1" transform="rotate(120 12 12)" />
-      </svg>
-    ),
+    icon: "https://frontend-assets.supabase.com/docs/f8cc6c21bd98/_next/static/media/claude-icon.9c4af215.svg",
   },
   {
     id: "cursor",
     label: "Cursor",
-    icon: (
-      <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
-        {/* Cursor arrow */}
-        <path d="M4 2v18l5-5 3 7 2.5-1-3-7h6L4 2z" />
-      </svg>
-    ),
+    icon: "https://frontend-assets.supabase.com/docs/f8cc6c21bd98/_next/static/media/cursor-icon.58e4e63b.svg",
   },
   {
     id: "codex",
     label: "Codex",
-    icon: (
-      <svg viewBox="0 0 24 24" className="size-3.5" fill="currentColor" aria-hidden>
-        {/* OpenAI bloom — simplified swirl */}
-        <path d="M21.4 8.6a6 6 0 0 0-.5-4.9 6.1 6.1 0 0 0-6.5-2.9 6 6 0 0 0-4.5-2A6.1 6.1 0 0 0 4 4.3a6 6 0 0 0-4 2.9 6.1 6.1 0 0 0 .7 7.2 6 6 0 0 0 .5 4.9 6.1 6.1 0 0 0 6.5 2.9 6 6 0 0 0 4.5 2 6.1 6.1 0 0 0 5.8-4.2 6 6 0 0 0 4-2.9 6.1 6.1 0 0 0-.7-7.2zM12 20.6a4.5 4.5 0 0 1-2.9-1l.1-.1 4.8-2.8a.8.8 0 0 0 .4-.7V9.7l2 1.2v5.6a4.5 4.5 0 0 1-4.4 4.1zM3.6 17a4.5 4.5 0 0 1-.5-3l.1.1 4.8 2.8a.8.8 0 0 0 .8 0l5.8-3.4v2.3l-4.8 2.8A4.5 4.5 0 0 1 3.6 17zm-.9-9.5a4.5 4.5 0 0 1 2.4-2V11a.8.8 0 0 0 .4.7l5.8 3.3-2 1.2-4.8-2.8A4.5 4.5 0 0 1 2.7 7.5zm15.1 3.9-5.8-3.4 2-1.2a.1.1 0 0 1 .1 0L18.9 9.6a4.5 4.5 0 0 1-.7 8.1v-5.6a.8.8 0 0 0-.4-.7zm2-3-.1-.1-4.8-2.8a.8.8 0 0 0-.8 0L8.4 8.9V6.6l4.8-2.8a4.5 4.5 0 0 1 6.7 4.6zM7.3 12.5 5.4 11.4a.1.1 0 0 1 0-.1V6.1A4.5 4.5 0 0 1 12.7 3l-.1.1-4.8 2.8a.8.8 0 0 0-.4.7zm1 2.3 2.6-1.5 2.6 1.5v3l-2.6 1.5-2.6-1.5z" />
-      </svg>
-    ),
+    icon: "https://frontend-assets.supabase.com/docs/f8cc6c21bd98/_next/static/media/openai-icon.8e57f6fa.svg",
   },
 ];
 
-function mcpCommand(client: McpClient, token: string): string {
-  const json = JSON.stringify(
-    {
-      mcpServers: {
-        cv: {
-          type: "http",
-          url: "https://ai-cv.ha7ch.com/api/mcp",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      },
-    },
-    null,
-    2,
-  );
+const MCP_URL = "https://ai-cv.ha7ch.com/api/mcp";
 
+function cursorDeeplink(token: string): string {
+  const config = btoa(
+    JSON.stringify({
+      url: MCP_URL,
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+  );
+  return `cursor://anysphere.cursor-deeplink/mcp/install?name=cv&config=${encodeURIComponent(config)}`;
+}
+
+function mcpCommand(client: McpClient, token: string): string {
   if (client === "claude") {
     return (
-      `claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \\\n` +
+      `claude mcp add cv --transport http ${MCP_URL} \\\n` +
       `  --header "Authorization: Bearer ${token}"`
     );
   }
-  return json;
+  if (client === "codex") {
+    return (
+      `export CV_TOKEN=${token}\n` +
+      `codex mcp add cv --url ${MCP_URL} --bearer-token-env-var CV_TOKEN`
+    );
+  }
+  return cursorDeeplink(token);
 }
 
 export default function RegisterFlow() {
@@ -127,25 +118,28 @@ export default function RegisterFlow() {
 
     const mcpCmd = mcpCommand(mcpClient, result.token);
 
+    const activeClient = MCP_CLIENTS.find((c) => c.id === mcpClient)!;
     const clientSelector = (
-      <div className="flex items-center gap-0.5">
-        {MCP_CLIENTS.map(({ id, label, icon }) => (
-          <button
-            key={id}
-            onClick={() => setMcpClient(id)}
-            className={cn(
-              "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
-              mcpClient === id
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-            title={label}
-            aria-label={label}
-          >
-            {icon}
-          </button>
-        ))}
-      </div>
+      <Select value={mcpClient} onValueChange={(v) => setMcpClient(v as McpClient)}>
+        <SelectTrigger
+          size="sm"
+          className="h-7 gap-1.5 border-0 bg-transparent px-2 shadow-none hover:bg-background/60 focus-visible:ring-0 dark:bg-transparent dark:hover:bg-background/60"
+          aria-label="MCP client"
+        >
+          <SelectValue>
+            <img src={activeClient.icon} alt="" className="size-3.5" />
+            <span className="text-xs">{activeClient.label}</span>
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {MCP_CLIENTS.map(({ id, label, icon }) => (
+            <SelectItem key={id} value={id}>
+              <img src={icon} alt="" className="size-3.5" />
+              <span>{label}</span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
 
     return (
@@ -196,8 +190,20 @@ export default function RegisterFlow() {
             />
             <p className="text-xs text-muted-foreground">
               {mcpClient === "claude" && "Run once in your terminal, then restart Claude Code."}
-              {mcpClient === "cursor" && "Add to ~/.cursor/mcp.json, then reload Cursor."}
-              {mcpClient === "codex" && "Add to ~/.codex/config.json, then restart Codex."}
+              {mcpClient === "cursor" && (
+                <>
+                  <a
+                    href={mcpCmd}
+                    className="font-medium text-foreground underline-offset-2 hover:underline"
+                  >
+                    Open in Cursor →
+                  </a>{" "}
+                  or paste the link into your browser.
+                </>
+              )}
+              {mcpClient === "codex" && (
+                <>Run both lines in your terminal. Add the <code className="font-mono">export</code> to <code className="font-mono">~/.zshrc</code> so the token persists.</>
+              )}
             </p>
           </TabsContent>
         </Tabs>
@@ -252,7 +258,7 @@ function CodeBlock({ value, id, copied, onCopy, selector }: {
     <div className="relative">
       <pre className={cn(
         "overflow-x-auto rounded-md border bg-muted px-4 py-3 font-mono text-sm leading-relaxed whitespace-pre-wrap",
-        selector ? "pr-28" : "pr-14",
+        selector ? "pr-44" : "pr-14",
       )}>
         <code>{value}</code>
       </pre>
