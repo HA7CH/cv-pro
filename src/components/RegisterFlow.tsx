@@ -3,17 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Check, Copy, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 
 interface SavedData { handle: string; token: string }
 const LS_KEY = "cv_registration";
@@ -21,21 +14,9 @@ const LS_KEY = "cv_registration";
 type McpClient = "claude" | "cursor" | "codex";
 
 const MCP_CLIENTS: { id: McpClient; label: string; icon: string }[] = [
-  {
-    id: "claude",
-    label: "Claude Code",
-    icon: "https://frontend-assets.supabase.com/docs/f8cc6c21bd98/_next/static/media/claude-icon.9c4af215.svg",
-  },
-  {
-    id: "cursor",
-    label: "Cursor",
-    icon: "https://frontend-assets.supabase.com/docs/f8cc6c21bd98/_next/static/media/cursor-icon.58e4e63b.svg",
-  },
-  {
-    id: "codex",
-    label: "Codex",
-    icon: "https://frontend-assets.supabase.com/docs/f8cc6c21bd98/_next/static/media/openai-icon.8e57f6fa.svg",
-  },
+  { id: "claude", label: "Claude Code", icon: "/mcp/claude.svg" },
+  { id: "cursor", label: "Cursor", icon: "/mcp/cursor.svg" },
+  { id: "codex", label: "Codex", icon: "/mcp/openai.svg" },
 ];
 
 const MCP_URL = "https://ai-cv.ha7ch.com/api/mcp";
@@ -50,20 +31,33 @@ function cursorDeeplink(token: string): string {
   return `cursor://anysphere.cursor-deeplink/mcp/install?name=cv&config=${encodeURIComponent(config)}`;
 }
 
-function mcpCommand(client: McpClient, token: string): string {
-  if (client === "claude") {
-    return (
-      `claude mcp add cv --transport http ${MCP_URL} \\\n` +
-      `  --header "Authorization: Bearer ${token}"`
-    );
-  }
-  if (client === "codex") {
-    return (
-      `export CV_TOKEN=${token}\n` +
-      `codex mcp add cv --url ${MCP_URL} --bearer-token-env-var CV_TOKEN`
-    );
-  }
-  return cursorDeeplink(token);
+function claudeCommand(token: string): string {
+  return (
+    `claude mcp add cv --transport http ${MCP_URL} \\\n` +
+    `  --header "Authorization: Bearer ${token}"`
+  );
+}
+
+function codexCommand(token: string): string {
+  return (
+    `export CV_TOKEN=${token}\n` +
+    `codex mcp add cv --url ${MCP_URL} --bearer-token-env-var CV_TOKEN`
+  );
+}
+
+function mcpJson(token: string): string {
+  return JSON.stringify(
+    {
+      mcpServers: {
+        cv: {
+          url: MCP_URL,
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      },
+    },
+    null,
+    2,
+  );
 }
 
 export default function RegisterFlow() {
@@ -116,30 +110,25 @@ export default function RegisterFlow() {
       `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
       `Run npx ai-cv@latest --help if needed. Ask if unclear.`;
 
-    const mcpCmd = mcpCommand(mcpClient, result.token);
-
-    const activeClient = MCP_CLIENTS.find((c) => c.id === mcpClient)!;
     const clientSelector = (
-      <Select value={mcpClient} onValueChange={(v) => setMcpClient(v as McpClient)}>
-        <SelectTrigger
-          size="sm"
-          className="h-7 gap-1.5 border-0 bg-transparent px-2 shadow-none hover:bg-background/60 focus-visible:ring-0 dark:bg-transparent dark:hover:bg-background/60"
-          aria-label="MCP client"
-        >
-          <SelectValue>
-            <img src={activeClient.icon} alt="" className="size-3.5" />
-            <span className="text-xs">{activeClient.label}</span>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {MCP_CLIENTS.map(({ id, label, icon }) => (
-            <SelectItem key={id} value={id}>
-              <img src={icon} alt="" className="size-3.5" />
-              <span>{label}</span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="flex items-center gap-0.5">
+        {MCP_CLIENTS.map(({ id, label, icon }) => (
+          <button
+            key={id}
+            onClick={() => setMcpClient(id)}
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded-md transition-colors",
+              mcpClient === id
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+            )}
+            title={label}
+            aria-label={label}
+          >
+            <img src={icon} alt="" className="size-3" />
+          </button>
+        ))}
+      </div>
     );
 
     return (
@@ -172,7 +161,7 @@ export default function RegisterFlow() {
           </TabsList>
 
           <TabsContent value="cli" className="mt-4 space-y-2">
-            <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} />
+            <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} wrap />
             <p className="text-xs text-muted-foreground">
               Paste into <span className="font-medium">local</span> Claude Code — works with PDF, text, or plain conversation.
               Sandboxed agents (Claude Code Cloud, ChatGPT Code Interpreter) often block this host;
@@ -181,8 +170,23 @@ export default function RegisterFlow() {
           </TabsContent>
 
           <TabsContent value="mcp" className="mt-4 space-y-2">
+            {mcpClient === "cursor" && (
+              <a
+                href={cursorDeeplink(result.token)}
+                className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+              >
+                <img src={MCP_CLIENTS[1].icon} alt="" className="size-4 invert" />
+                Add to Cursor
+              </a>
+            )}
             <CodeBlock
-              value={mcpCmd}
+              value={
+                mcpClient === "claude"
+                  ? claudeCommand(result.token)
+                  : mcpClient === "codex"
+                    ? codexCommand(result.token)
+                    : mcpJson(result.token)
+              }
               id={`mcp-${mcpClient}`}
               copied={copied}
               onCopy={copy}
@@ -190,20 +194,8 @@ export default function RegisterFlow() {
             />
             <p className="text-xs text-muted-foreground">
               {mcpClient === "claude" && "Run once in your terminal, then restart Claude Code."}
-              {mcpClient === "cursor" && (
-                <>
-                  <a
-                    href={mcpCmd}
-                    className="font-medium text-foreground underline-offset-2 hover:underline"
-                  >
-                    Open in Cursor →
-                  </a>{" "}
-                  or paste the link into your browser.
-                </>
-              )}
-              {mcpClient === "codex" && (
-                <>Run both lines in your terminal. Add the <code className="font-mono">export</code> to <code className="font-mono">~/.zshrc</code> so the token persists.</>
-              )}
+              {mcpClient === "cursor" && "Or add to ~/.cursor/mcp.json, then reload Cursor."}
+              {mcpClient === "codex" && "Run in your terminal. Add the export to ~/.zshrc so the token persists."}
             </p>
           </TabsContent>
         </Tabs>
@@ -246,33 +238,37 @@ export default function RegisterFlow() {
   );
 }
 
-function CodeBlock({ value, id, copied, onCopy, selector }: {
+function CodeBlock({ value, id, copied, onCopy, selector, wrap = false }: {
   value: string;
   id: string;
   copied: string | null;
   onCopy: (t: string, k: string) => void;
   selector?: React.ReactNode;
+  wrap?: boolean;
 }) {
   const isCopied = copied === id;
   return (
-    <div className="relative">
-      <pre className={cn(
-        "overflow-x-auto rounded-md border bg-muted px-4 py-3 font-mono text-sm leading-relaxed whitespace-pre-wrap",
-        selector ? "pr-44" : "pr-14",
-      )}>
-        <code>{value}</code>
-      </pre>
-      <div className="absolute right-1.5 top-1.5 flex items-center gap-0.5">
+    <div className="overflow-hidden rounded-md border bg-muted">
+      <div className="flex items-center justify-end gap-0.5 px-1.5 py-1">
         {selector}
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+          className="h-6 w-6 text-muted-foreground hover:bg-background/60 hover:text-foreground"
           onClick={() => onCopy(value, id)}
+          aria-label={isCopied ? "Copied" : "Copy"}
         >
-          {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
         </Button>
       </div>
+      <pre
+        className={cn(
+          "overflow-x-auto px-4 pb-3 pt-0 font-mono text-sm leading-relaxed",
+          wrap ? "whitespace-pre-wrap" : "whitespace-pre",
+        )}
+      >
+        <code>{value}</code>
+      </pre>
     </div>
   );
 }
