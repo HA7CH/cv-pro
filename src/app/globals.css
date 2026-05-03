@@ -6,7 +6,7 @@
 
 @theme inline {
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-playfair);
+  --font-serif: var(--font-playfair), var(--font-noto-serif-sc);
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);

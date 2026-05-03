@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Montserrat, Geist } from "next/font/google";
+import { Playfair_Display, Montserrat, Geist, Noto_Serif_SC } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,12 @@ const playfair = Playfair_Display({
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
+});
+
+const notoSerifSC = Noto_Serif_SC({
+  variable: "--font-noto-serif-sc",
+  weight: ["400", "700"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -49,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", playfair.variable, montserrat.variable, "font-sans", geist.variable)}
+      className={cn("h-full", "antialiased", playfair.variable, montserrat.variable, notoSerifSC.variable, "font-sans", geist.variable)}
     >
       <body className="min-h-full bg-white text-zinc-900 font-sans">
         {children}

@@ -1,5 +1,7 @@
 import type { ResumeData } from "@/types/resume";
 
+const CJK_RE = /[㐀-鿿豈-﫿]/;
+
 export default function ResumeTemplate({ data }: { data: ResumeData }) {
   const headerLinks: Array<{ label: string; href?: string }> = [];
   if (data.personalInfo.phone) {
@@ -12,8 +14,13 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
     headerLinks.push({ label: c.label, href: c.url });
   }
 
+  const isCJK = CJK_RE.test(JSON.stringify(data));
+  const bodyFont = isCJK
+    ? "[font-family:var(--font-noto-serif-sc)]"
+    : "[font-family:var(--font-montserrat)]";
+
   return (
-    <main className="mx-auto max-w-3xl px-10 py-16 [font-family:var(--font-montserrat)] text-zinc-900">
+    <main className={`mx-auto max-w-3xl px-10 py-16 ${bodyFont} text-zinc-900`}>
       <header>
         <h1 className="font-serif text-center text-5xl font-bold tracking-tight">
           {data.header.name}
@@ -42,7 +49,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
       <hr className="mt-6 mb-8 border-zinc-200" />
 
       {data.education.length > 0 && (
-        <Section title="Education">
+        <Section title="Education" italic={isCJK}>
           {data.education.map((e, i) => (
             <Entry
               key={i}
@@ -55,7 +62,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
       )}
 
       {data.experience.length > 0 && (
-        <Section title="Experience">
+        <Section title="Experience" italic={isCJK}>
           {data.experience.map((job, i) => (
             <Entry
               key={i}
@@ -69,7 +76,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
       )}
 
       {(data.projectsDetailed.length > 0 || data.projectsRecent.length > 0) && (
-        <Section title="Projects">
+        <Section title="Projects" italic={isCJK}>
           {data.projectsDetailed.map((p, i) => (
             <Entry
               key={i}
@@ -93,7 +100,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
       )}
 
       {data.skills.length > 0 && (
-        <Section title="Skills">
+        <Section title="Skills" italic={isCJK}>
           <div className="grid grid-cols-1 gap-x-12 gap-y-4 sm:grid-cols-2">
             {data.skills.map((cat) => (
               <div key={cat.name} className="text-[13px] leading-relaxed">
@@ -113,10 +120,18 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  italic,
+  children,
+}: {
+  title: string;
+  italic?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <section className="mb-10">
-      <h2 className="font-serif text-3xl mb-4">{title}</h2>
+      <h2 className={`font-serif text-3xl mb-4 ${italic ? "italic" : ""}`}>{title}</h2>
       {children}
     </section>
   );
