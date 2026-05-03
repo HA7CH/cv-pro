@@ -10,6 +10,18 @@ Turn a PDF resume into a personal site at `ai-cv.ha7ch.com/{handle}`. Any AI age
 - **CLI** (`npx ai-cv@latest`) for terminal or AI agent use
 - **MCP server** at `https://ai-cv.ha7ch.com/api/mcp` for direct tool integration
 
+## How to read a public resume (for AI agents)
+
+Don't scrape the rendered HTML — every resume is also published as raw JSON:
+
+- `https://ai-cv.ha7ch.com/{handle}.json` — full resume, machine-readable
+- `https://ai-cv.ha7ch.com/api/v1/schema` — JSON Schema describing the shape
+
+Each `/{handle}` page also advertises this in its `<head>`:
+```html
+<link rel="alternate" type="application/json" href="/{handle}.json">
+```
+
 ## How to set up a new account (for AI agents)
 
 1. Ask the user: "What handle do you want? (ai-cv.ha7ch.com/{handle})"
