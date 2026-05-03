@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import ResumeTemplate from "@/components/resume/ResumeTemplate";
+import ResumeView from "@/components/resume/ResumeView";
 import type { ResumeData } from "@/types/resume";
 
 const sample: ResumeData = {
@@ -96,5 +98,9 @@ const sample: ResumeData = {
 };
 
 export default function PreviewPage() {
-  return <ResumeTemplate data={sample} />;
+  return (
+    <Suspense fallback={<ResumeTemplate data={sample} />}>
+      <ResumeView data={sample} />
+    </Suspense>
+  );
 }

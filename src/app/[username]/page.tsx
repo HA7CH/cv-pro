@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import ResumeTemplate from "@/components/resume/ResumeTemplate";
+import ResumeView from "@/components/resume/ResumeView";
 import { getResumeByUsername } from "@/lib/resume-store";
 import type { ResumeData } from "@/types/resume";
 
@@ -91,7 +93,9 @@ export default async function UserResumePage({
           __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
         }}
       />
-      <ResumeTemplate data={resume} />
+      <Suspense fallback={<ResumeTemplate data={resume} />}>
+        <ResumeView data={resume} />
+      </Suspense>
     </>
   );
 }
