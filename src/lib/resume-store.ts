@@ -1,4 +1,5 @@
 import "server-only";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { z } from "zod";
 import { supabaseAnon } from "@/lib/supabase/client";
 import {
@@ -14,23 +15,25 @@ import {
   workExperienceSchema,
 } from "@/types/resume";
 
-export async function getResumeByUsername(
-  username: string,
-): Promise<ResumeData | null> {
-  try {
-    const { data, error } = await supabaseAnon
-      .from("cv_resumes")
-      .select("data")
-      .eq("username", username)
-      .maybeSingle();
+export const getResumeByUsername = unstable_cache(
+  async (username: string): Promise<ResumeData | null> => {
+    try {
+      const { data, error } = await supabaseAnon
+        .from("cv_resumes")
+        .select("data")
+        .eq("username", username)
+        .maybeSingle();
 
-    if (error) console.warn("[resume-store] read failed:", error.message);
-    if (data?.data) return normalizeResume(data.data, username);
-  } catch (err) {
-    console.warn("[resume-store] unreachable:", err);
-  }
-  return null;
-}
+      if (error) console.warn("[resume-store] read failed:", error.message);
+      if (data?.data) return normalizeResume(data.data, username);
+    } catch (err) {
+      console.warn("[resume-store] unreachable:", err);
+    }
+    return null;
+  },
+  ["resume-by-username"],
+  { revalidate: 300 },
+);
 
 export async function upsertResume(data: ResumeData): Promise<ResumeData> {
   const next: ResumeData = {
@@ -44,6 +47,7 @@ export async function upsertResume(data: ResumeData): Promise<ResumeData> {
   );
   if (error) throw new Error(`upsertResume failed: ${error.message}`);
 
+  revalidatePath(`/${data.username}`);
   return next;
 }
 

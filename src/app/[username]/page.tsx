@@ -10,8 +10,11 @@ type RouteParams = { username: string };
 
 const BASE_URL = "https://ai-cv.ha7ch.com";
 
-function buildDescription(resume: ResumeData): string {
-  const parts: string[] = [];
+export const revalidate = 300;
+export const dynamicParams = true;
+
+function buildDescription(resume: ResumeData, username: string): string {
+  const parts: string[] = [`${username}'s resume on ai-cv — ${resume.header.name}.`];
   const exp = resume.experience[0];
   if (exp) parts.push(`${exp.role} at ${exp.company}.`);
   const topSkills = resume.skills.flatMap((c) => c.items).slice(0, 5);
@@ -33,9 +36,9 @@ export async function generateMetadata({
 
   const exp = resume.experience[0];
   const title = exp
-    ? `${resume.header.name} — ${exp.role} at ${exp.company} | ai-cv`
-    : `${resume.header.name} | ai-cv`;
-  const description = buildDescription(resume);
+    ? `${resume.header.name} (${username}) — ${exp.role} at ${exp.company} | ai-cv`
+    : `${resume.header.name} (${username}) | ai-cv`;
+  const description = buildDescription(resume, username);
   const url = `${BASE_URL}/${username}`;
 
   return {
