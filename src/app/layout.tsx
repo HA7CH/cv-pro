@@ -26,13 +26,13 @@ export const metadata: Metadata = {
   title: "Stop sending different PDFs. Send cv.pro",
   description:
     "One live URL, many tailored views. Send cv.pro/<you>?for=openai or ?role=ml or ?at=2025 — your resume, contextualized per audience, no PDF attachment needed.",
-  metadataBase: new URL("https://ai-cv.ha7ch.com"),
+  metadataBase: new URL("https://cv.ha7ch.com"),
   openGraph: {
     title: "Stop sending different PDFs. Send cv.pro",
     description:
       "One live URL, many tailored views. Send cv.pro/<you>?for=openai or ?role=ml or ?at=2025.",
-    url: "https://ai-cv.ha7ch.com",
-    siteName: "ai-cv",
+    url: "https://cv.ha7ch.com",
+    siteName: "cv-pro",
     type: "website",
   },
   twitter: {
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
       "One live URL, many tailored views.",
   },
   keywords: [
-    "ai-cv", "AI resume", "living resume", "tailored resume",
+    "cv-pro", "AI resume", "living resume", "tailored resume",
     "resume URL", "resume per company", "resume CLI", "resume MCP",
-    "AI-native resume", "npx ai-cv",
+    "AI-native resume", "npx cv-pro",
   ],
 };
 

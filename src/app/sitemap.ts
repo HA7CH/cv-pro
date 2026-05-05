@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { supabaseAnon } from "@/lib/supabase/client";
 
-const BASE_URL = "https://ai-cv.ha7ch.com";
+const BASE_URL = "https://cv.ha7ch.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data } = await supabaseAnon

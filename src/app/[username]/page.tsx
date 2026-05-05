@@ -4,17 +4,34 @@ import { Suspense } from "react";
 import ResumeTemplate from "@/components/resume/ResumeTemplate";
 import ResumeView from "@/components/resume/ResumeView";
 import { getResumeByUsername } from "@/lib/resume-store";
+import { applyResumeFilters, type AppliedFilters } from "@/lib/resume-filter";
 import type { ResumeData } from "@/types/resume";
 
 type RouteParams = { username: string };
+type SearchParams = { [key: string]: string | string[] | undefined };
 
-const BASE_URL = "https://ai-cv.ha7ch.com";
+const BASE_URL = "https://cv.ha7ch.com";
 
 export const revalidate = 300;
 export const dynamicParams = true;
 
+function searchParamsToURLSearchParams(sp: SearchParams): URLSearchParams {
+  const url = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (typeof v === "string") url.set(k, v);
+    else if (Array.isArray(v) && v.length) url.set(k, v[0]);
+  }
+  return url;
+}
+
+export interface ResumeViewBanner {
+  filters: AppliedFilters;
+  totals: { before: number; after: number };
+  username: string;
+}
+
 function buildDescription(resume: ResumeData, username: string): string {
-  const parts: string[] = [`${username}'s resume on ai-cv — ${resume.header.name}.`];
+  const parts: string[] = [`${username}'s resume on cv-pro — ${resume.header.name}.`];
   const exp = resume.experience[0];
   if (exp) parts.push(`${exp.role} at ${exp.company}.`);
   const topSkills = resume.skills.flatMap((c) => c.items).slice(0, 5);
@@ -31,13 +48,13 @@ export async function generateMetadata({
   const { username } = await params;
   const resume = await getResumeByUsername(username);
   if (!resume) {
-    return { title: `${username} — ai-cv` };
+    return { title: `${username} — cv-pro` };
   }
 
   const exp = resume.experience[0];
   const title = exp
-    ? `${resume.header.name} (${username}) — ${exp.role} at ${exp.company} | ai-cv`
-    : `${resume.header.name} (${username}) | ai-cv`;
+    ? `${resume.header.name} (${username}) — ${exp.role} at ${exp.company} | cv-pro`
+    : `${resume.header.name} (${username}) | cv-pro`;
   const description = buildDescription(resume, username);
   const url = `${BASE_URL}/${username}`;
 
@@ -87,13 +104,23 @@ function buildPersonSchema(resume: ResumeData) {
 
 export default async function UserResumePage({
   params,
+  searchParams,
 }: {
   params: Promise<RouteParams>;
+  searchParams: Promise<SearchParams>;
 }) {
   const { username } = await params;
+  const sp = await searchParams;
   const resume = await getResumeByUsername(username);
   if (!resume) notFound();
-  const schema = buildPersonSchema(resume);
+
+  const url = searchParamsToURLSearchParams(sp);
+  const result = applyResumeFilters(resume, url);
+  const banner: ResumeViewBanner | null = result.active
+    ? { filters: result.filters, totals: result.totals, username }
+    : null;
+
+  const schema = buildPersonSchema(result.resume);
   return (
     <>
       <script
@@ -102,8 +129,8 @@ export default async function UserResumePage({
           __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
         }}
       />
-      <Suspense fallback={<ResumeTemplate data={resume} />}>
-        <ResumeView data={resume} />
+      <Suspense fallback={<ResumeTemplate data={result.resume} banner={banner} />}>
+        <ResumeView data={result.resume} banner={banner} />
       </Suspense>
     </>
   );

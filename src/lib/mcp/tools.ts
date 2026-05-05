@@ -28,7 +28,10 @@ export const TOOLS = [
       "Replace the authenticated user's entire resume. Use after parsing a PDF, or for large rewrites. " +
       "The 'username' and 'meta' fields are auto-managed — do not send them. " +
       "Required top-level sections: header, personalInfo, experience, education, " +
-      "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected — call get_schema first if unsure.",
+      "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected — call get_schema first if unsure. " +
+      "AFTER saving, ALWAYS ask the user: 'Want to tag any of these experiences/projects for a specific company or role? " +
+      "Tagged entries enable shareable URLs like cv.ha7ch.com/<user>?for=openai or ?role=designer instead of maintaining separate PDFs.' " +
+      "Each experience/project accepts a 'tags' array of lowercase strings (e.g. tags: ['openai', 'ml']).",
     inputSchema: {
       type: "object",
       properties: {
@@ -42,7 +45,9 @@ export const TOOLS = [
     name: "update_section",
     description:
       "Replace a single top-level section of the resume. Use for targeted conversational edits. " +
-      "Each section has a strict shape — call get_schema to see field names, or get_resume to inspect the live structure.",
+      "Each section has a strict shape — call get_schema to see field names, or get_resume to inspect the live structure. " +
+      "When updating experience / projectsRecent / projectsDetailed, REMEMBER 'tags' (lowercase string array). " +
+      "After saving, suggest tags to the user when relevant (company name for ?for=, role/topic for ?role=/?focus=).",
     inputSchema: {
       type: "object",
       properties: {

@@ -1,13 +1,13 @@
 {
-  "name": "ai-cv",
-  "version": "0.2.7",
-  "description": "AI-native resume CLI — update your living resume at ai-cv.ha7ch.com from Claude Code or any terminal",
-  "homepage": "https://ai-cv.ha7ch.com",
-  "repository": "https://github.com/LAWTED/ai-cv",
+  "name": "cv-pro",
+  "version": "0.3.0",
+  "description": "AI-native resume CLI — update your living resume at cv.ha7ch.com from Claude Code or any terminal",
+  "homepage": "https://cv.ha7ch.com",
+  "repository": "https://github.com/LAWTED/cv-pro",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "ai-cv": "./dist/index.js"
+    "cv-pro": "./dist/index.js"
   },
   "files": [
     "dist"

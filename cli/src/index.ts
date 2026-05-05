@@ -6,10 +6,10 @@ import { register, whoami, getResume, putResume, patchSection, getSchema } from 
 const VERSION = "0.2.7";
 
 const HELP = `
-aicv — AI-native resume CLI  (ai-cv.ha7ch.com)
+aicv — AI-native resume CLI  (cv.ha7ch.com)
 
 USAGE
-  ai-cv <command> [options]
+  cv-pro <command> [options]
 
 COMMANDS
   register <handle>           Claim a handle and get a token (no browser needed)
@@ -26,20 +26,20 @@ SECTIONS
   header, personalInfo, experience, education,
   projectsRecent, projectsDetailed, skills, contact
 
-  Run 'ai-cv schema' for the full field-level structure.
+  Run 'cv-pro schema' for the full field-level structure.
 
 EXAMPLES
-  ai-cv register lawted
-  ai-cv whoami
-  ai-cv get
-  ai-cv update resume.json
-  ai-cv update-section experience experience.json
+  cv-pro register lawted
+  cv-pro whoami
+  cv-pro get
+  cv-pro update resume.json
+  cv-pro update-section experience experience.json
   echo '{"name":"Lawted"}' | cv update-section header
 
 ENV
   CV_TOKEN   token (overrides saved config)
   CV_HANDLE  handle (required when using CV_TOKEN)
-  CV_API     API base URL (default: https://ai-cv.ha7ch.com)
+  CV_API     API base URL (default: https://cv.ha7ch.com)
 `.trim();
 
 async function main() {
@@ -59,7 +59,7 @@ async function main() {
   // register
   if (cmd === "register") {
     const handle = args[1]?.toLowerCase().trim();
-    if (!handle) die("Usage: ai-cv register <handle>");
+    if (!handle) die("Usage: cv-pro register <handle>");
     process.stdout.write(`Registering @${handle}… `);
     const apiBase = process.env.CV_API ?? DEFAULT_API;
     const result = await register(handle, apiBase);
@@ -75,7 +75,7 @@ async function main() {
   if (cmd === "login") {
     const token = args[1];
     if (!token) {
-      die("Usage: cv login <token>\nGet a token at ai-cv.ha7ch.com");
+      die("Usage: cv login <token>\nGet a token at cv.ha7ch.com");
     }
     if (!token.startsWith("cv_pat_")) {
       die("Token must start with cv_pat_");
@@ -87,7 +87,7 @@ async function main() {
     const result = await whoami(cfg);
     if (!result.ok) {
       if (result.reason === "no-resume") {
-        die("\nToken valid, but no resume on file. Run: ai-cv register <handle>");
+        die("\nToken valid, but no resume on file. Run: cv-pro register <handle>");
       }
       if (result.reason === "unauthorized") die("\nInvalid token.");
       die("\nServer error. Try again.");
@@ -116,7 +116,7 @@ async function main() {
   // commands that need auth
   const config = loadConfig();
   if (!config?.token) {
-    die("Not logged in. Run: ai-cv login <token>\nGet a token at ai-cv.ha7ch.com");
+    die("Not logged in. Run: cv-pro login <token>\nGet a token at cv.ha7ch.com");
   }
 
   if (cmd === "whoami") {
@@ -126,7 +126,7 @@ async function main() {
       if (!result.ok) {
         if (result.reason === "unauthorized") die("Invalid token.");
         if (result.reason === "no-resume") {
-          die("Token valid, but no resume on file. Run: ai-cv register <handle>");
+          die("Token valid, but no resume on file. Run: cv-pro register <handle>");
         }
         die("Server unreachable.");
       }
@@ -176,7 +176,7 @@ async function main() {
     return;
   }
 
-  die(`Unknown command: ${cmd}\nRun 'ai-cv help' to see available commands.`);
+  die(`Unknown command: ${cmd}\nRun 'cv-pro help' to see available commands.`);
 }
 
 function readJsonArg(filePath: string | undefined, label: string): unknown {

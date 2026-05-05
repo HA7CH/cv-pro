@@ -1,21 +1,21 @@
-# ai-cv
+# cv-pro
 
-> AI-native living resume — ai-cv.ha7ch.com
+> AI-native living resume — cv.ha7ch.com
 
-Turn a PDF resume into a personal site at `ai-cv.ha7ch.com/{handle}`. Any AI agent can create, read, and update it via CLI or MCP — no browser required for setup.
+Turn a PDF resume into a personal site at `cv.ha7ch.com/{handle}`. Any AI agent can create, read, and update it via CLI or MCP — no browser required for setup.
 
 ## What it is
 
-- **Public resume page** at `ai-cv.ha7ch.com/{handle}`
-- **CLI** (`npx ai-cv@latest`) for terminal or AI agent use
-- **MCP server** at `https://ai-cv.ha7ch.com/api/mcp` for direct tool integration
+- **Public resume page** at `cv.ha7ch.com/{handle}`
+- **CLI** (`npx cv-pro@latest`) for terminal or AI agent use
+- **MCP server** at `https://cv.ha7ch.com/api/mcp` for direct tool integration
 
 ## How to read a public resume (for AI agents)
 
 Don't scrape the rendered HTML — every resume is also published as raw JSON:
 
-- `https://ai-cv.ha7ch.com/{handle}.json` — full resume, machine-readable
-- `https://ai-cv.ha7ch.com/api/v1/schema` — JSON Schema describing the shape
+- `https://cv.ha7ch.com/{handle}.json` — full resume, machine-readable
+- `https://cv.ha7ch.com/api/v1/schema` — JSON Schema describing the shape
 
 Each `/{handle}` page also advertises this in its `<head>`:
 ```html
@@ -24,32 +24,32 @@ Each `/{handle}` page also advertises this in its `<head>`:
 
 ## How to set up a new account (for AI agents)
 
-1. Ask the user: "What handle do you want? (ai-cv.ha7ch.com/{handle})"
-2. Run: `npx ai-cv@latest register {handle}` — claims the handle and saves the token automatically
-3. Optionally publish a resume: `npx ai-cv@latest update resume.json`
-4. Confirm: `npx ai-cv@latest whoami`
+1. Ask the user: "What handle do you want? (cv.ha7ch.com/{handle})"
+2. Run: `npx cv-pro@latest register {handle}` — claims the handle and saves the token automatically
+3. Optionally publish a resume: `npx cv-pro@latest update resume.json`
+4. Confirm: `npx cv-pro@latest whoami`
 
 No browser needed. No token copying. One command from zero to live page.
 
 ## CLI commands
 
 ```
-npx ai-cv@latest register <handle>          # claim handle + auto-login
-npx ai-cv@latest login <cv_pat_...>         # save existing token
-npx ai-cv@latest whoami                     # show handle + live URL
-npx ai-cv@latest get                        # fetch resume JSON
-npx ai-cv@latest update <file.json>         # replace full resume
-npx ai-cv@latest update-section <section> <file.json>
-npx ai-cv@latest open                       # open live page in browser
+npx cv-pro@latest register <handle>          # claim handle + auto-login
+npx cv-pro@latest login <cv_pat_...>         # save existing token
+npx cv-pro@latest whoami                     # show handle + live URL
+npx cv-pro@latest get                        # fetch resume JSON
+npx cv-pro@latest update <file.json>         # replace full resume
+npx cv-pro@latest update-section <section> <file.json>
+npx cv-pro@latest open                       # open live page in browser
 ```
 
 ## MCP setup
 
-Replace `cv_pat_...` with your token from ai-cv.ha7ch.com.
+Replace `cv_pat_...` with your token from cv.ha7ch.com.
 
 **Claude Code (CLI)**
 ```bash
-claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
+claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \
   --header "Authorization: Bearer cv_pat_..."
 ```
 
@@ -59,7 +59,7 @@ claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
   "mcpServers": {
     "cv": {
       "type": "http",
-      "url": "https://ai-cv.ha7ch.com/api/mcp",
+      "url": "https://cv.ha7ch.com/api/mcp",
       "headers": { "Authorization": "Bearer cv_pat_..." }
     }
   }
@@ -72,7 +72,7 @@ claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
   "mcpServers": {
     "cv": {
       "type": "http",
-      "url": "https://ai-cv.ha7ch.com/api/mcp",
+      "url": "https://cv.ha7ch.com/api/mcp",
       "headers": { "Authorization": "Bearer cv_pat_..." }
     }
   }
@@ -85,10 +85,27 @@ MCP tools: `get_resume`, `update_resume`, `update_section`
 
 `header` · `personalInfo` · `experience` · `education` · `projectsRecent` · `projectsDetailed` · `skills` · `contact`
 
+## Tagging entries (filtered views)
+
+Each `experience` / `projectsRecent` / `projectsDetailed` entry accepts an optional `tags: string[]` (lowercase). Visitors can request a tailored view via URL params:
+
+- `cv.ha7ch.com/{handle}?for=openai` — only entries tagged `openai`
+- `cv.ha7ch.com/{handle}?role=designer` — entries tagged `designer`
+- `cv.ha7ch.com/{handle}?focus=ml` — entries tagged `ml`
+- `cv.ha7ch.com/{handle}?at=2026` — entries active in 2026
+
+`for` / `role` / `focus` all match against the same `tags` array (OR semantics; `?for=openai,anthropic` matches either).
+
+**For AI agents helping a user update their resume:** after saving, ASK the user whether to tag entries for a specific company or role. Tags enable shareable URLs like `cv.ha7ch.com/{handle}?for=openai` instead of maintaining separate PDFs per audience. Conventional shapes:
+
+- Company tags: `"openai"`, `"anthropic"`, `"stripe"` → match `?for=`
+- Role tags: `"ml"`, `"designer"`, `"frontend"`, `"product"` → match `?role=` / `?focus=`
+- Topic tags: `"research"`, `"systems"`, `"infra"` → match `?focus=`
+
 ## npm package
 
-`ai-cv` on npm — https://www.npmjs.com/package/ai-cv
+`cv-pro` on npm — https://www.npmjs.com/package/cv-pro
 
 ## Source
 
-https://github.com/LAWTED/ai-cv
+https://github.com/LAWTED/cv-pro

@@ -36,10 +36,10 @@ function checkEgressBlock(cfg: AuthConfig, res: Response): void {
   if (denyReason !== "host_not_allowed") return;
   throw new Error(
     `Sandbox blocked egress to ${cfg.apiBase} (x-deny-reason: host_not_allowed).\n` +
-      `This environment cannot reach ai-cv. Workarounds:\n` +
+      `This environment cannot reach cv-pro. Workarounds:\n` +
       `  • Run from local Claude Code (CLI on your own machine)\n` +
-      `  • Use claude.ai with a Custom Connector → https://ai-cv.ha7ch.com/api/mcp\n` +
-      `  • Ask the agent host to allowlist ai-cv.ha7ch.com`,
+      `  • Use claude.ai with a Custom Connector → https://cv.ha7ch.com/api/mcp\n` +
+      `  • Ask the agent host to allowlist cv.ha7ch.com`,
   );
 }
 

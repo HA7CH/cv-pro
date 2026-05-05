@@ -20,7 +20,7 @@ interface JsonSchema {
 function renderText(schema: JsonSchema): string {
   const lines: string[] = [];
   lines.push("Resume schema");
-  lines.push("Live JSON form: https://ai-cv.ha7ch.com/api/v1/schema");
+  lines.push("Live JSON form: https://cv.ha7ch.com/api/v1/schema");
   lines.push("");
   lines.push("Sections (top-level keys of the resume object):");
   lines.push("");
@@ -56,6 +56,23 @@ function renderText(schema: JsonSchema): string {
   lines.push("  • 'username' and 'meta' are auto-managed; do not send them.");
   lines.push("  • update_section / PATCH replaces a single section in one call;");
   lines.push("    send the full new array, not a delta.");
+  lines.push("");
+  lines.push("Tagging entries (filtered views via query params):");
+  lines.push("  • experience / projectsRecent / projectsDetailed each accept");
+  lines.push("    a 'tags' array of lowercase strings. Optional, default [].");
+  lines.push("  • Visitors can request a tailored view via URL params:");
+  lines.push("      cv.ha7ch.com/<user>?for=openai     → entries tagged 'openai'");
+  lines.push("      cv.ha7ch.com/<user>?role=designer  → entries tagged 'designer'");
+  lines.push("      cv.ha7ch.com/<user>?focus=ml       → entries tagged 'ml'");
+  lines.push("      cv.ha7ch.com/<user>?at=2026        → entries active in 2026");
+  lines.push("  • for / role / focus all match against the same 'tags' array");
+  lines.push("    (OR semantics; comma-separates lists, e.g. ?for=openai,anthropic).");
+  lines.push("  • Conventions: company tags = lowercase company name; role tags =");
+  lines.push("    track ('ml', 'designer', 'frontend', 'product'); topic tags =");
+  lines.push("    domain ('research', 'systems', 'infra').");
+  lines.push("  • When you update a resume, ASK the user whether to tag entries");
+  lines.push("    for a specific company / role. Tags enable shareable URLs like");
+  lines.push("    cv.ha7ch.com/<user>?for=openai instead of separate PDFs.");
 
   return lines.join("\n");
 }

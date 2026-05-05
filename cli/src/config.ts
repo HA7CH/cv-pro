@@ -11,7 +11,7 @@ export interface Config {
   apiBase: string;
 }
 
-export const DEFAULT_API = "https://ai-cv.ha7ch.com";
+export const DEFAULT_API = "https://cv.ha7ch.com";
 
 export function loadConfig(): Config | null {
   const envToken = process.env.CV_TOKEN;

@@ -1,23 +1,23 @@
-# ai-cv
+# cv-pro
 
-Turn a PDF resume into a living personal site at **ai-cv.ha7ch.com/{handle}**.
+Turn a PDF resume into a living personal site at **cv.ha7ch.com/{handle}**.
 
 Drop a PDF, paste text, or describe a change — an AI agent does the rest.
 
 ---
 
-## If you are an AI agent helping a user set up ai-cv
+## If you are an AI agent helping a user set up cv-pro
 
 Follow these steps exactly, in order. No browser required.
 
 **Step 1 — Ask the user one question before doing anything else:**
 
-> What handle do you want? Your resume will be live at `ai-cv.ha7ch.com/{handle}`.
+> What handle do you want? Your resume will be live at `cv.ha7ch.com/{handle}`.
 
 **Step 2 — Register and log in (one command)**
 
 ```bash
-npx ai-cv@latest register {handle}
+npx cv-pro@latest register {handle}
 ```
 
 This claims the handle and saves the token automatically. Output: `Logged in as @{handle}`.
@@ -30,7 +30,7 @@ Ask: *Do you have a resume PDF or any content to publish now?*
 
 - **PDF** — read the file, extract all fields into JSON, save to `/tmp/resume.json`, then:
   ```bash
-  npx ai-cv@latest update /tmp/resume.json
+  npx cv-pro@latest update /tmp/resume.json
   ```
 - **Text / paste** — same flow, extract from pasted content.
 - **Later** — skip. The page is already live with an empty template.
@@ -38,10 +38,10 @@ Ask: *Do you have a resume PDF or any content to publish now?*
 **Step 4 — Confirm**
 
 ```bash
-npx ai-cv@latest whoami
+npx cv-pro@latest whoami
 ```
 
-Tell the user their live URL: **https://ai-cv.ha7ch.com/{handle}**
+Tell the user their live URL: **https://cv.ha7ch.com/{handle}**
 
 For future edits: drop a PDF or describe changes. Sections: `header`, `personalInfo`, `experience`, `education`, `projectsRecent`, `projectsDetailed`, `skills`, `contact`.
 
@@ -52,19 +52,19 @@ Each `experience` and `projectsDetailed` entry takes a `bullets: string[]` field
 ## CLI reference
 
 ```bash
-npx ai-cv@latest register <handle>      # claim handle + auto-login (no browser)
-npx ai-cv@latest login cv_pat_...       # save an existing token
-npx ai-cv@latest whoami                 # show handle + page URL
-npx ai-cv@latest get                    # print resume JSON
-npx ai-cv@latest update resume.json     # replace full resume
-npx ai-cv@latest update-section <section> data.json
-npx ai-cv@latest open                   # open live page in browser
-npx ai-cv@latest open --json            # open the public JSON view
+npx cv-pro@latest register <handle>      # claim handle + auto-login (no browser)
+npx cv-pro@latest login cv_pat_...       # save an existing token
+npx cv-pro@latest whoami                 # show handle + page URL
+npx cv-pro@latest get                    # print resume JSON
+npx cv-pro@latest update resume.json     # replace full resume
+npx cv-pro@latest update-section <section> data.json
+npx cv-pro@latest open                   # open live page in browser
+npx cv-pro@latest open --json            # open the public JSON view
 ```
 
 ## Public JSON URL
 
-Every resume is also served as raw JSON at **`https://ai-cv.ha7ch.com/{handle}.json`** — no auth, CORS-open, fetch-friendly for any AI agent.
+Every resume is also served as raw JSON at **`https://cv.ha7ch.com/{handle}.json`** — no auth, CORS-open, fetch-friendly for any AI agent.
 
 `CV_TOKEN` env var overrides saved credentials.
 
@@ -74,7 +74,7 @@ Replace `cv_pat_...` with your token.
 
 **Claude Code**
 ```bash
-claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
+claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \
   --header "Authorization: Bearer cv_pat_..."
 ```
 
@@ -84,7 +84,7 @@ claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
   "mcpServers": {
     "cv": {
       "type": "http",
-      "url": "https://ai-cv.ha7ch.com/api/mcp",
+      "url": "https://cv.ha7ch.com/api/mcp",
       "headers": { "Authorization": "Bearer cv_pat_..." }
     }
   }
@@ -97,7 +97,7 @@ claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
   "mcpServers": {
     "cv": {
       "type": "http",
-      "url": "https://ai-cv.ha7ch.com/api/mcp",
+      "url": "https://cv.ha7ch.com/api/mcp",
       "headers": { "Authorization": "Bearer cv_pat_..." }
     }
   }
@@ -108,9 +108,9 @@ Tools: `get_resume` · `update_resume` · `update_section`
 
 ## Troubleshooting
 
-**Sandboxed agents fail to connect.** Some hosted AI agents (Claude Code Cloud, ChatGPT Code Interpreter, etc.) run inside an egress allowlist that blocks `ai-cv.ha7ch.com`. The CLI surfaces this as `Sandbox blocked egress to ... (host_not_allowed)`. There is no client-side workaround — run from local Claude Code, or attach the MCP server (`/api/mcp`) as a Custom Connector on claude.ai, which uses a different egress.
+**Sandboxed agents fail to connect.** Some hosted AI agents (Claude Code Cloud, ChatGPT Code Interpreter, etc.) run inside an egress allowlist that blocks `cv.ha7ch.com`. The CLI surfaces this as `Sandbox blocked egress to ... (host_not_allowed)`. There is no client-side workaround — run from local Claude Code, or attach the MCP server (`/api/mcp`) as a Custom Connector on claude.ai, which uses a different egress.
 
 ## Links
 
-- Site: [ai-cv.ha7ch.com](https://ai-cv.ha7ch.com)
-- Repo: [github.com/LAWTED/ai-cv](https://github.com/LAWTED/ai-cv)
+- Site: [cv.ha7ch.com](https://cv.ha7ch.com)
+- Repo: [github.com/LAWTED/cv-pro](https://github.com/LAWTED/cv-pro)

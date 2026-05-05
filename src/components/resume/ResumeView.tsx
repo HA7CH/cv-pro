@@ -5,8 +5,15 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import ResumeTemplate from "./ResumeTemplate";
 import type { ResumeData } from "@/types/resume";
+import type { ResumeViewBanner } from "@/lib/resume-filter";
 
-export default function ResumeView({ data }: { data: ResumeData }) {
+export default function ResumeView({
+  data,
+  banner,
+}: {
+  data: ResumeData;
+  banner?: ResumeViewBanner | null;
+}) {
   const params = useSearchParams();
   const pathname = usePathname();
   const isJSON = params.get("view") === "json";
@@ -42,7 +49,7 @@ export default function ResumeView({ data }: { data: ResumeData }) {
         </Link>
       </nav>
 
-      {isJSON ? <ResumeJSON data={data} /> : <ResumeTemplate data={data} />}
+      {isJSON ? <ResumeJSON data={data} /> : <ResumeTemplate data={data} banner={banner} />}
     </div>
   );
 }
@@ -53,7 +60,7 @@ function ResumeJSON({ data }: { data: ResumeData }) {
     <main className="mx-auto max-w-3xl px-10 pb-16 pt-24 text-zinc-900">
       <p className="mb-4 text-[13px] leading-relaxed text-zinc-500">
         Machine-readable resume — fetched and edited by AI agents (Claude,
-        Cursor, ChatGPT) through the ai-cv CLI or MCP. Also served as raw JSON
+        Cursor, ChatGPT) through the cv-pro CLI or MCP. Also served as raw JSON
         at{" "}
         <code className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-[12px] text-zinc-700">
           /{data.username}.json

@@ -9,6 +9,7 @@ export const workExperienceSchema = z
     startDate: trimmed,
     endDate: trimmed,
     bullets: z.array(trimmed).default([]),
+    tags: z.array(trimmed).default([]),
   })
   .strict();
 
@@ -27,6 +28,7 @@ export const projectShortSchema = z
     title: trimmed,
     description: trimmed,
     url: trimmed,
+    tags: z.array(trimmed).default([]),
   })
   .strict();
 
@@ -39,6 +41,7 @@ export const projectDetailedSchema = z
     url: trimmed.optional(),
     award: trimmed.optional(),
     bullets: z.array(trimmed).default([]),
+    tags: z.array(trimmed).default([]),
     externalLink: z
       .object({ label: trimmed, url: trimmed })
       .strict()

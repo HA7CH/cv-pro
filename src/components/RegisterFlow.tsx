@@ -19,7 +19,7 @@ const MCP_CLIENTS: { id: McpClient; label: string; icon: string }[] = [
   { id: "codex", label: "Codex", icon: "/mcp/openai.svg" },
 ];
 
-const MCP_URL = "https://ai-cv.ha7ch.com/api/mcp";
+const MCP_URL = "https://cv.ha7ch.com/api/mcp";
 
 function cursorDeeplink(token: string): string {
   const config = btoa(
@@ -147,10 +147,13 @@ export default function RegisterFlow() {
 
   if (result) {
     const cliPrompt =
-      `Update my resume at ai-cv.ha7ch.com.\n\n` +
-      `Run first: npx ai-cv@latest login ${result.token}\n\n` +
+      `Update my resume at cv.ha7ch.com.\n\n` +
+      `Run first: npx cv-pro@latest login ${result.token}\n\n` +
       `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
-      `Run npx ai-cv@latest --help if needed. Ask if unclear.`;
+      `Run npx cv-pro@latest --help if needed. Ask if unclear.\n\n` +
+      `After saving, ASK me whether to tag any entries for a specific company or role. ` +
+      `Tags enable shareable URLs like cv.ha7ch.com/<me>?for=openai or ?role=designer ` +
+      `instead of maintaining separate PDFs per audience.`;
 
     const clientSelector = (
       <div className="flex items-center gap-0.5">
@@ -178,7 +181,7 @@ export default function RegisterFlow() {
         {/* Claimed handle */}
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            <span className="font-medium text-foreground">ai-cv.ha7ch.com/{result.handle}</span>{" "}
+            <span className="font-medium text-foreground">cv.ha7ch.com/{result.handle}</span>{" "}
             is yours
           </span>
           <button
@@ -255,7 +258,7 @@ export default function RegisterFlow() {
           target="_blank"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          ai-cv.ha7ch.com/{result.handle}
+          cv.ha7ch.com/{result.handle}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -272,7 +275,7 @@ export default function RegisterFlow() {
         <div className="flex items-center gap-2">
           <div className="flex h-9 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
             <span className="select-none font-mono text-muted-foreground">
-              ai-cv.ha7ch.com/
+              cv.ha7ch.com/
             </span>
             <input
               type="text"
