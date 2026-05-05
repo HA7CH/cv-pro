@@ -185,17 +185,23 @@ export default function RegisterFlow() {
             onClick={() => { try { localStorage.removeItem(LS_KEY); } catch {} setResult(null); setHandle(""); }}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
-            switch handle
+            switch account
           </button>
         </div>
 
-        {/* Token */}
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Token</p>
+        {/* Step 2 - Token */}
+        <div className="space-y-2">
+          <h3 className="font-serif text-2xl tracking-tight">
+            Step 2 · Save your token
+          </h3>
           <CodeBlock value={result.token} id="token" copied={copied} onCopy={copy} />
         </div>
 
-        {/* Tabs */}
+        {/* Step 3 - Tabs */}
+        <div className="space-y-3">
+          <h3 className="font-serif text-2xl tracking-tight">
+            Step 3 · Update your resume
+          </h3>
         <Tabs defaultValue="cli">
           <TabsList className="w-fit">
             <TabsTrigger value="cli">CLI</TabsTrigger>
@@ -241,6 +247,7 @@ export default function RegisterFlow() {
             </p>
           </TabsContent>
         </Tabs>
+        </div>
 
         {/* Live page */}
         <Link
@@ -256,30 +263,42 @@ export default function RegisterFlow() {
   }
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Your resume will live at{" "}
-        <span className="font-mono text-foreground">ai-cv.ha7ch.com/{handle || "handle"}</span>
-      </p>
-      <div className="flex gap-2">
-        <Input
-          value={handle}
-          onChange={(e) => {
-            setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
-            setError("");
-            setTakenHandle(null);
-            setTokenError("");
-          }}
-          placeholder="your-handle"
-          maxLength={30}
-          required
-          autoFocus
-          className="font-mono"
-        />
-        <Button type="submit" disabled={loading || !handle}>
-          {loading ? "…" : "Get token →"}
-        </Button>
+    <form onSubmit={submit} className="space-y-4">
+      <h2 className="font-serif text-2xl tracking-tight">
+        Step 1 · Create your account
+      </h2>
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
+            <span className="select-none font-mono text-muted-foreground">
+              ai-cv.ha7ch.com/
+            </span>
+            <input
+              type="text"
+              value={handle}
+              onChange={(e) => {
+                setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                setError("");
+                setTakenHandle(null);
+                setTokenError("");
+              }}
+              placeholder="yourname"
+              maxLength={30}
+              required
+              autoFocus
+              className="flex-1 bg-transparent font-mono outline-none placeholder:text-muted-foreground/60"
+            />
+          </div>
+          <Button type="submit" disabled={loading || !handle}>
+            {loading ? "…" : "Get token →"}
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Choose a username for your page.
+        </p>
       </div>
+
       {error && <p className="text-sm text-destructive">{error}</p>}
       {takenHandle && (
         <div className="space-y-2 pt-2">

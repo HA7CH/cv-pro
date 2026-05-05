@@ -23,27 +23,28 @@ const notoSerifSC = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
-  title: "ai-cv — AI-native living resume",
+  title: "Stop sending different PDFs. Send cv.pro",
   description:
-    "Claim a handle, run one command, and your resume is live at ai-cv.ha7ch.com/{handle}. Drop a PDF or describe changes — any AI agent updates it instantly via CLI or MCP.",
+    "One live URL, many tailored views. Send cv.pro/<you>?for=openai or ?role=ml or ?at=2025 — your resume, contextualized per audience, no PDF attachment needed.",
   metadataBase: new URL("https://ai-cv.ha7ch.com"),
   openGraph: {
-    title: "ai-cv — AI-native living resume",
+    title: "Stop sending different PDFs. Send cv.pro",
     description:
-      "Claim a handle, run one command, and your resume is live at ai-cv.ha7ch.com/{handle}. Drop a PDF or describe changes — any AI agent updates it instantly via CLI or MCP.",
+      "One live URL, many tailored views. Send cv.pro/<you>?for=openai or ?role=ml or ?at=2025.",
     url: "https://ai-cv.ha7ch.com",
     siteName: "ai-cv",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "ai-cv — AI-native living resume",
+    title: "Stop sending different PDFs. Send cv.pro",
     description:
-      "Claim a handle, run one command, and your resume is live at ai-cv.ha7ch.com/{handle}.",
+      "One live URL, many tailored views.",
   },
   keywords: [
-    "ai-cv", "AI resume", "living resume", "Claude Code resume",
-    "resume CLI", "resume MCP", "AI-native resume", "npx ai-cv",
+    "ai-cv", "AI resume", "living resume", "tailored resume",
+    "resume URL", "resume per company", "resume CLI", "resume MCP",
+    "AI-native resume", "npx ai-cv",
   ],
 };
 
