@@ -222,7 +222,7 @@ export default function RegisterFlow() {
 
           <div className="space-y-2">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <div className="flex h-9 min-w-0 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
+              <div className="flex h-10 min-w-0 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-base transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
                 <span className="select-none font-mono text-muted-foreground">
                   cv.ha7ch.com/
                 </span>
