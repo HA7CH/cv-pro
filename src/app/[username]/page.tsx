@@ -12,8 +12,6 @@ type SearchParams = { [key: string]: string | string[] | undefined };
 
 const BASE_URL = "https://cv.ha7ch.com";
 
-export const revalidate = 300;
-export const dynamicParams = true;
 
 function searchParamsToURLSearchParams(sp: SearchParams): URLSearchParams {
   const url = new URLSearchParams();
@@ -115,7 +113,21 @@ function renderResume(resume: ResumeData) {
 
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
-export default async function UserResumePage({
+export default function UserResumePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<RouteParams>;
+  searchParams: Promise<SearchParams>;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <ResumePageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function ResumePageContent({
   params,
   searchParams,
 }: {
