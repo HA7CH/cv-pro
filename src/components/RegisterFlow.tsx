@@ -197,18 +197,24 @@ export default function RegisterFlow() {
           <h2 className="font-serif text-2xl tracking-tight">
             Step 1 · Create your online CV
           </h2>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              <span className="font-medium text-foreground">cv.ha7ch.com/{result.handle}</span>{" "}
-              is yours
-            </span>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <a
+              href={`/${result.handle}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-10 min-w-0 flex-1 items-center gap-1 rounded-md border bg-muted px-3 py-2 text-base hover:brightness-95 transition-all"
+            >
+              <span className="select-none font-mono text-foreground">cv.ha7ch.com/</span>
+              <span className="font-mono text-foreground">{result.handle}</span>
+              <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            </a>
             <button
               onClick={() => {
                 try { localStorage.removeItem(LS_KEY); } catch {}
                 setResult(null);
                 setHandle("");
               }}
-              className="text-xs text-muted-foreground hover:text-foreground"
+              className="h-10 rounded-md px-4 text-sm text-muted-foreground border border-input hover:text-foreground transition-colors w-full sm:w-auto"
             >
               switch account
             </button>
@@ -245,7 +251,7 @@ export default function RegisterFlow() {
               <Button
                 type="submit"
                 disabled={loading || !handle}
-                className="w-full sm:w-auto"
+                className="h-10 w-full sm:w-auto"
               >
                 {loading ? "…" : "Get token →"}
               </Button>

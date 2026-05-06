@@ -30,8 +30,10 @@ function rpcError(
 
 async function authenticate(req: NextRequest) {
   const header = req.headers.get("authorization");
-  if (!header || !header.toLowerCase().startsWith("bearer ")) return null;
-  const token = header.slice(7).trim();
+  const token = header?.toLowerCase().startsWith("bearer ")
+    ? header.slice(7).trim()
+    : req.nextUrl.searchParams.get("token") ?? "";
+  if (!token) return null;
   return verifyPat(token);
 }
 

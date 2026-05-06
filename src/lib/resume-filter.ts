@@ -3,8 +3,6 @@ import type { ResumeData } from "@/types/resume";
 export interface AppliedFilters {
   /** Lowercase tag strings to match against entry.tags (OR semantics). */
   tags: string[];
-  /** Year string from `?at=YYYY`. Matches entries active during that year. */
-  year?: string;
 }
 
 export interface FilterResult {
@@ -19,7 +17,7 @@ export interface FilterResult {
 }
 
 
-const TAG_KEYS = ["for", "role", "focus"] as const;
+const TAG_KEYS = ["company", "role", "focus", "lang"] as const;
 
 export function collectTagsFromParams(
   params: URLSearchParams | { get(k: string): string | null },
@@ -50,15 +48,13 @@ export function applyResumeFilters(
   params: URLSearchParams | { get(k: string): string | null },
 ): FilterResult {
   const wantedTags = collectTagsFromParams(params);
-  const yearRaw = params.get("at");
-  const yearFilter = yearRaw && yearRaw.trim() ? yearRaw.trim() : undefined;
 
   const totalBefore =
     resume.experience.length +
     resume.projectsRecent.length +
     resume.projectsDetailed.length;
 
-  if (!wantedTags.size && !yearFilter) {
+  if (!wantedTags.size) {
     return {
       resume,
       active: false,
@@ -72,11 +68,6 @@ export function applyResumeFilters(
       const tags = new Set((entry.tags ?? []).map((s) => s.toLowerCase()));
       const tagHit = [...wantedTags].some((t) => tags.has(t));
       if (!tagHit) return false;
-    }
-    if (yearFilter && (entry.startDate || entry.endDate)) {
-      if (!isActiveAtYear(entry.startDate, entry.endDate, yearFilter)) {
-        return false;
-      }
     }
     return true;
   };
@@ -110,39 +101,8 @@ export function applyResumeFilters(
   return {
     resume: filtered,
     active: true,
-    filters: { tags: [...wantedTags], year: yearFilter },
+    filters: { tags: [...wantedTags] },
     totals: { before: totalBefore, after: totalAfter },
   };
 }
 
-/**
- * True if the entry's date range overlaps the given year. Tries to be
- * permissive: if dates can't be parsed, the entry is kept (don't lose
- * good data to bad strings). "Present" / "Now" / "Current" are treated
- * as "still active in any year ≥ start".
- */
-export function isActiveAtYear(
-  start: string | undefined,
-  end: string | undefined,
-  yearStr: string,
-): boolean {
-  const year = parseInt(yearStr, 10);
-  if (Number.isNaN(year)) return true;
-
-  const startYear = extractYear(start);
-  const endYear = extractYear(end);
-
-  if (startYear == null && endYear == null) return true;
-  if (startYear != null && startYear > year) return false;
-  if (endYear != null && endYear < year) return false;
-  return true;
-}
-
-const PRESENT_RE = /\b(present|now|current|now\.)\b/i;
-
-function extractYear(s: string | undefined): number | null {
-  if (!s) return null;
-  if (PRESENT_RE.test(s)) return Number.POSITIVE_INFINITY;
-  const m = s.match(/\d{4}/);
-  return m ? parseInt(m[0], 10) : null;
-}

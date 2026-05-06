@@ -1,0 +1,8 @@
+[mcp_servers.cv]
+url = "https://cv.ha7ch.com/api/mcp"
+
+[mcp_servers.cv.http_headers]
+Authorization = "Bearer cv_pat_NCT5y22fJenUgu13Nl-VCE13d-3criIK"
+
+[mcp_servers.supabase]
+url = "https://mcp.supabase.com/mcp?project_ref=kfofhszjhdhyuhfmlnrw"

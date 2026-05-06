@@ -45,7 +45,7 @@ export default function Home() {
 
       <section
         aria-labelledby="funding-title"
-        className="mt-16 rounded-lg border border-border bg-muted/30 p-5 md:p-6"
+        className="mt-16 rounded-lg border bg-muted p-5 md:p-6"
       >
         <div className="flex items-baseline justify-between gap-3">
           <p id="funding-title" className="text-sm font-medium">
