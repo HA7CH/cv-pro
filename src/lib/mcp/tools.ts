@@ -29,9 +29,11 @@ export const TOOLS = [
       "The 'username' and 'meta' fields are auto-managed — do not send them. " +
       "Required top-level sections: header, personalInfo, experience, education, " +
       "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected — call get_schema first if unsure. " +
-      "AFTER saving, ALWAYS ask the user: 'Want to tag any of these experiences/projects for a specific company or role? " +
-      "Tagged entries enable shareable URLs like cv.ha7ch.com/<user>?for=openai or ?role=designer instead of maintaining separate PDFs.' " +
-      "Each experience/project accepts a 'tags' array of lowercase strings (e.g. tags: ['openai', 'ml']).",
+      "\n\nAFTER saving, follow this workflow:\n" +
+      "1. ASK the user: 'Which audience is this resume for? A specific company (e.g. OpenAI), a role (e.g. designer, ML engineer, research), or both?'\n" +
+      "2. Once you know the target, update each relevant experience / project entry's `tags` array via update_section. Use lowercase strings: company name (`'openai'`), role/track (`'designer'`, `'ml'`, `'frontend'`), topic (`'research'`).\n" +
+      "3. After tagging, TELL the user the final shareable URL, e.g. 'Your designer-targeted resume is at cv.ha7ch.com/<user>?role=designer — send this when applying for design roles.'\n" +
+      "Re-running this workflow lets the user maintain one resume but ship multiple targeted views (one URL per company / role / year), no PDFs.",
     inputSchema: {
       type: "object",
       properties: {
@@ -170,10 +172,9 @@ function error(s: string) {
 function tagReminder(resume: ResumeData, username: string): string {
   const lines: string[] = [];
   lines.push(
-    `IMPORTANT — ASK the user whether to tag any entries for a specific ` +
-      `company or role. Tagged entries enable shareable URLs like ` +
-      `cv.ha7ch.com/${username}?for=openai or ?role=designer instead of ` +
-      `maintaining separate PDFs.`,
+    `NEXT STEP — ASK the user: "Which audience is this resume for? ` +
+      `A specific company (e.g. OpenAI), a role (e.g. designer, ML, ` +
+      `research), or both?" Then tag the entries below to match.`,
   );
 
   const untaggedExperience = resume.experience.filter(
@@ -208,11 +209,16 @@ function tagReminder(resume: ResumeData, username: string): string {
   }
 
   lines.push("");
+  lines.push("Tag conventions (lowercase):");
+  lines.push("  • Company name (e.g. 'openai') → matched by ?for=openai");
+  lines.push("  • Role/track (e.g. 'designer', 'ml') → matched by ?role=designer");
+  lines.push("  • Topic (e.g. 'research', 'systems') → matched by ?focus=research");
+  lines.push("");
   lines.push(
-    "Tag conventions: lowercase strings. Company name → ?for=, role/topic → ?role= or ?focus=.",
+    `Use update_section to write tags. After tagging, tell the user the final URL:`,
   );
   lines.push(
-    `Update via: update_section experience [<entries with tags filled in>]`,
+    `  e.g. "Your design-track resume is at cv.ha7ch.com/${username}?role=designer — send this when applying."`,
   );
   return lines.join("\n");
 }

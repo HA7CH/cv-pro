@@ -71,9 +71,11 @@ function buildCliPrompt(token: string): string {
     `Run first: npx cv-pro@latest login ${token}\n\n` +
     `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
     `Run npx cv-pro@latest --help if needed. Ask if unclear.\n\n` +
-    `After saving, ASK me whether to tag any entries for a specific company or role. ` +
-    `Tags enable shareable URLs like cv.ha7ch.com/<me>?for=openai or ?role=designer ` +
-    `instead of maintaining separate PDFs per audience.`
+    `After saving, run this workflow:\n` +
+    `1. ASK me: "Which audience is this resume for? Specific company (e.g. OpenAI), role (e.g. designer, ML, research), or both?"\n` +
+    `2. Add matching tags to each relevant experience / project entry. Use update_section experience with the tags filled in.\n` +
+    `3. Tell me the final shareable URL, e.g. "Your designer-track resume is at cv.ha7ch.com/<me>?role=designer — send that when applying."\n\n` +
+    `One resume, many targeted views — one URL per company/role/year, no separate PDFs.`
   );
 }
 

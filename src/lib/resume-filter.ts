@@ -25,29 +25,6 @@ export interface ResumeViewBanner {
   username: string;
 }
 
-/**
- * Collect every tag that appears anywhere in the resume's filterable
- * sections. Used to render the chip bar — visitors see what views are
- * available without having to read documentation.
- *
- * Returns lowercased, de-duplicated, alphabetically sorted strings.
- */
-export function collectAvailableTags(resume: ResumeData): string[] {
-  const tags = new Set<string>();
-  const collect = (entries: Array<{ tags?: string[] }>) => {
-    for (const e of entries) {
-      for (const t of e.tags ?? []) {
-        const norm = t.trim().toLowerCase();
-        if (norm) tags.add(norm);
-      }
-    }
-  };
-  collect(resume.experience);
-  collect(resume.projectsRecent);
-  collect(resume.projectsDetailed);
-  return [...tags].sort();
-}
-
 const TAG_KEYS = ["for", "role", "focus"] as const;
 
 export function collectTagsFromParams(

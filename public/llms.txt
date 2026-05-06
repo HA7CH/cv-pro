@@ -96,11 +96,19 @@ Each `experience` / `projectsRecent` / `projectsDetailed` entry accepts an optio
 
 `for` / `role` / `focus` all match against the same `tags` array (OR semantics; `?for=openai,anthropic` matches either).
 
-**For AI agents helping a user update their resume:** after saving, ASK the user whether to tag entries for a specific company or role. Tags enable shareable URLs like `cv.ha7ch.com/{handle}?for=openai` instead of maintaining separate PDFs per audience. Conventional shapes:
+**For AI agents helping a user update their resume — the targeting workflow:**
+
+1. After `update_resume` saves the base data, ASK the user: "Which audience is this resume for? A specific company (e.g. OpenAI), a role (e.g. designer, ML, research), or both?"
+2. Once you know the target, add matching tags to each relevant experience / project entry via `update_section`. Use lowercase strings.
+3. After tagging, TELL the user the final URL, e.g. "Your designer-track resume is at `cv.ha7ch.com/{handle}?role=designer` — send that when applying."
+
+Tag conventions:
 
 - Company tags: `"openai"`, `"anthropic"`, `"stripe"` → match `?for=`
 - Role tags: `"ml"`, `"designer"`, `"frontend"`, `"product"` → match `?role=` / `?focus=`
 - Topic tags: `"research"`, `"systems"`, `"infra"` → match `?focus=`
+
+The user can re-run this with different audiences (one resume, many targeted views — one URL per company/role/year, no separate PDFs).
 
 ## npm package
 

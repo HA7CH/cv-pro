@@ -73,8 +73,7 @@ export default function ResumeTemplate({
             <span className="tabular-nums font-medium text-zinc-900">
               {banner.totals.after}
             </span>{" "}
-            of{" "}
-            <span className="tabular-nums">{banner.totals.before}</span>{" "}
+            of <span className="tabular-nums">{banner.totals.before}</span>{" "}
             entries
           </span>
           <span aria-hidden>·</span>
