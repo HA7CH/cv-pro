@@ -136,7 +136,7 @@
 }
 
 .progress-bar-fill {
-  background-color: oklch(0.145 0 0);
+  background-color: #F97316;
   background-image: repeating-linear-gradient(
     45deg,
     transparent,
