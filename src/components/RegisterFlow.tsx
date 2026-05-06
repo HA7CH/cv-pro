@@ -248,7 +248,7 @@ export default function RegisterFlow() {
                 disabled={loading || !handle}
                 className="h-10 w-full sm:w-auto"
               >
-                {loading ? "…" : "Get token →"}
+                {loading ? "Claiming…" : "Get token →"}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -280,7 +280,7 @@ export default function RegisterFlow() {
                   onClick={() => loginWithToken()}
                   disabled={tokenLoading || !token.trim()}
                 >
-                  {tokenLoading ? "…" : "Log in →"}
+                  {tokenLoading ? "Verifying…" : "Log in →"}
                 </Button>
               </div>
               {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
