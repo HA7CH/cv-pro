@@ -258,33 +258,9 @@ export default function RegisterFlow() {
 
           {error && !takenHandle && <p className="text-sm text-destructive">{error}</p>}
           {takenHandle && (
-            <div className="space-y-3 pt-1">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-mono">@{takenHandle}</span> is taken — yours? Paste your token to log back in.
-              </p>
-              <div className="flex gap-2">
-                <Input
-                  value={token}
-                  onChange={(e) => { setToken(e.target.value); setTokenError(""); }}
-                  placeholder="cv_pat_..."
-                  className="font-mono"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      loginWithToken();
-                    }
-                  }}
-                />
-                <Button
-                  type="button"
-                  onClick={() => loginWithToken()}
-                  disabled={tokenLoading || !token.trim()}
-                >
-                  {tokenLoading ? "Verifying…" : "Log in →"}
-                </Button>
-              </div>
-              {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
-            </div>
+            <p className="text-sm text-muted-foreground pt-1">
+              <span className="font-mono">@{takenHandle}</span> is taken — paste your token in Step 2 to log back in.
+            </p>
           )}
         </form>
       )}
@@ -294,11 +270,40 @@ export default function RegisterFlow() {
         <h3 className="font-serif text-2xl tracking-tight">
           Step 2 · Save your token
         </h3>
-        <CodeBlock value={tokenDisplay} id="token" copied={copied} onCopy={copy} />
-        {!result && (
-          <p className="text-xs text-muted-foreground">
-            Your real token appears here after Step 1.
-          </p>
+        {takenHandle && !result ? (
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <Input
+                value={token}
+                onChange={(e) => { setToken(e.target.value); setTokenError(""); }}
+                placeholder="cv_pat_..."
+                className="font-mono"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    loginWithToken();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                onClick={() => loginWithToken()}
+                disabled={tokenLoading || !token.trim()}
+              >
+                {tokenLoading ? "Verifying…" : "Log in →"}
+              </Button>
+            </div>
+            {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
+          </div>
+        ) : (
+          <>
+            <CodeBlock value={tokenDisplay} id="token" copied={copied} onCopy={copy} />
+            {!result && (
+              <p className="text-xs text-muted-foreground">
+                Your real token appears here after Step 1.
+              </p>
+            )}
+          </>
         )}
       </div>
 
