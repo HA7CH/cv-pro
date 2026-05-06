@@ -261,16 +261,17 @@ export default function RegisterFlow() {
           {error && !takenHandle && <p className="text-sm text-destructive">{error}</p>}
 
           {takenHandle && !claimingOwn && (
-            <div className="flex flex-wrap items-center gap-3 pt-1">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-mono">@{takenHandle}</span> is taken.
-              </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-sm text-muted-foreground">
+                <span className="font-mono">@{takenHandle}</span> is taken
+              </span>
+              <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold leading-none text-white">✕</span>
               <button
                 type="button"
                 onClick={() => setClaimingOwn(true)}
                 className="text-sm underline underline-offset-2 hover:text-muted-foreground transition-colors"
               >
-                It&apos;s mine →
+                but it&apos;s mine
               </button>
             </div>
           )}
