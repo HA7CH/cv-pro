@@ -79,36 +79,43 @@ claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \
 }
 ```
 
-MCP tools: `get_resume`, `update_resume`, `update_section`
+MCP tools: `get_resume`, `update_resume`, `update_section`, `get_variant`, `set_variant`, `list_variants`
 
 ## Resume sections
 
 `header` · `personalInfo` · `experience` · `education` · `projectsRecent` · `projectsDetailed` · `skills` · `contact`
 
-## Tagging entries (filtered views)
+## URL params (filtered / variant views)
 
-Each `experience` / `projectsRecent` / `projectsDetailed` entry accepts an optional `tags: string[]` (lowercase). Visitors can request a tailored view via URL params:
+Visitors can request a tailored view via URL params:
 
-- `cv.ha7ch.com/{handle}?for=openai` — only entries tagged `openai`
-- `cv.ha7ch.com/{handle}?role=designer` — entries tagged `designer`
-- `cv.ha7ch.com/{handle}?focus=ml` — entries tagged `ml`
-- `cv.ha7ch.com/{handle}?at=2026` — entries active in 2026
+| Param | Example | Description |
+|-------|---------|-------------|
+| `company` | `?company=openai` | Company-targeted variant |
+| `role` | `?role=designer` | Role-targeted variant |
+| `focus` | `?focus=ml` | Topic-targeted variant |
+| `lang` | `?lang=en` or `?lang=zh` | Language variant — show the en or zh version of the resume |
 
-`for` / `role` / `focus` all match against the same `tags` array (OR semantics; `?for=openai,anthropic` matches either).
+`company` / `role` / `focus` load a stored variant created via `set_variant`. `lang` selects the language variant.
 
-**For AI agents helping a user update their resume — the targeting workflow:**
+## Variant Workflow (AI Agent Instructions)
 
-1. After `update_resume` saves the base data, ASK the user: "Which audience is this resume for? A specific company (e.g. OpenAI), a role (e.g. designer, ML, research), or both?"
-2. Once you know the target, add matching tags to each relevant experience / project entry via `update_section`. Use lowercase strings.
-3. After tagging, TELL the user the final URL, e.g. "Your designer-track resume is at `cv.ha7ch.com/{handle}?role=designer` — send that when applying."
+Instead of just tagging entries, use the variant system to store per-audience full resumes:
 
-Tag conventions:
+1. After uploading a resume via update_resume, ask: "Do you have a job description?"
+2. Ask: "Which audience? company (e.g. openai), role (e.g. designer), language (en/zh), or combination?"
+3. Call list_variants to show existing variants and offer as a starting base.
+4. Rewrite bullets/descriptions based on the JD and target audience.
+5. Call set_variant(audience, fullResumeData) to store the tailored version.
+6. Tell the user their shareable URL:
+   - `cv.ha7ch.com/{handle}?company=openai` — company-targeted version
+   - `cv.ha7ch.com/{handle}?role=designer` — role-targeted version
+   - `cv.ha7ch.com/{handle}?focus=ml` — topic-targeted version
+   - `cv.ha7ch.com/{handle}?lang=en` — English version
+   - `cv.ha7ch.com/{handle}?lang=zh` — Chinese version
 
-- Company tags: `"openai"`, `"anthropic"`, `"stripe"` → match `?for=`
-- Role tags: `"ml"`, `"designer"`, `"frontend"`, `"product"` → match `?role=` / `?focus=`
-- Topic tags: `"research"`, `"systems"`, `"infra"` → match `?focus=`
-
-The user can re-run this with different audiences (one resume, many targeted views — one URL per company/role/year, no separate PDFs).
+Variants can be derived: "take my openai version and make a tiktok version from it" →
+call get_variant("openai"), rewrite for TikTok, call set_variant("tiktok", ...).
 
 ## npm package
 
