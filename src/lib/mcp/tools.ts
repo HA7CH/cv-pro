@@ -95,7 +95,11 @@ export async function dispatchTool(
           return error(`Invalid resume:\n${formatIssues(result.error)}`);
         }
         const saved = await upsertResume(result.data);
-        return text(`Resume saved. View at /${ctx.username}.\n\nStored data:\n${JSON.stringify(saved, null, 2)}`);
+        return text(
+          `Resume saved. View at /${ctx.username}.\n\n` +
+          tagReminder(saved, ctx.username) +
+          `\nStored data:\n${JSON.stringify(saved, null, 2)}`,
+        );
       }
 
       case "update_section": {
@@ -119,7 +123,11 @@ export async function dispatchTool(
           username: ctx.username,
         };
         await upsertResume(next);
-        return text(`Section '${section}' updated.`);
+        const after =
+          (await getResumeByUsername(ctx.username)) ?? next;
+        return text(
+          `Section '${section}' updated.\n\n` + tagReminder(after, ctx.username),
+        );
       }
 
       default:
@@ -151,6 +159,62 @@ function text(s: string) {
 
 function error(s: string) {
   return { content: [{ type: "text" as const, text: s }], isError: true };
+}
+
+/**
+ * Builds an instruction string the agent will see in the tool response,
+ * nudging it to ask the user about tags. Tailored: lists which entries
+ * already have tags vs which don't, so the agent can suggest tagging
+ * specific ones.
+ */
+function tagReminder(resume: ResumeData, username: string): string {
+  const lines: string[] = [];
+  lines.push(
+    `IMPORTANT — ASK the user whether to tag any entries for a specific ` +
+      `company or role. Tagged entries enable shareable URLs like ` +
+      `cv.ha7ch.com/${username}?for=openai or ?role=designer instead of ` +
+      `maintaining separate PDFs.`,
+  );
+
+  const untaggedExperience = resume.experience.filter(
+    (e) => !e.tags || e.tags.length === 0,
+  );
+  const untaggedProjects = [
+    ...resume.projectsRecent.filter((p) => !p.tags || p.tags.length === 0),
+    ...resume.projectsDetailed.filter((p) => !p.tags || p.tags.length === 0),
+  ];
+
+  if (untaggedExperience.length > 0) {
+    lines.push("");
+    lines.push("Experience entries without tags:");
+    for (const exp of untaggedExperience) {
+      lines.push(`  • ${exp.role} at ${exp.company}`);
+    }
+  }
+  if (untaggedProjects.length > 0) {
+    lines.push("");
+    lines.push("Project entries without tags:");
+    for (const p of untaggedProjects) {
+      const t = "title" in p ? (p as { title: string }).title : "(untitled)";
+      lines.push(`  • ${t}`);
+    }
+  }
+
+  if (untaggedExperience.length === 0 && untaggedProjects.length === 0) {
+    lines.push("");
+    lines.push(
+      "(All entries already have tags — confirm they still match the user's intent.)",
+    );
+  }
+
+  lines.push("");
+  lines.push(
+    "Tag conventions: lowercase strings. Company name → ?for=, role/topic → ?role= or ?focus=.",
+  );
+  lines.push(
+    `Update via: update_section experience [<entries with tags filled in>]`,
+  );
+  return lines.join("\n");
 }
 
 function emptyResume(username: string): ResumeData {
