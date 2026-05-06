@@ -185,7 +185,7 @@ export default function RegisterFlow() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Step 1 */}
       {result ? (
         <div className="space-y-2">
