@@ -280,8 +280,11 @@ export default function RegisterFlow() {
       {/* Step 2 - Save your token */}
       <div className="space-y-2">
         <h3 className="font-serif text-2xl tracking-tight">
-          {claimingOwn && !result ? "Back already?" : "Step 2 · Save your token"}
+          {claimingOwn && !result ? "Welcome back" : "Step 2 · Save your token"}
         </h3>
+        {claimingOwn && !result && (
+          <p className="text-xs text-muted-foreground">Please paste your token.</p>
+        )}
         {claimingOwn && !result ? (
           <>
             <div className="overflow-hidden rounded-md border bg-muted">
