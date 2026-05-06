@@ -324,9 +324,7 @@ export default function RegisterFlow() {
           <TabsContent value="cli" className="mt-4 space-y-2">
             <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} wrap />
             <p className="text-xs text-muted-foreground">
-              Paste into <span className="font-medium">local</span> Claude Code — works with PDF, text, or plain conversation.
-              Sandboxed agents (Claude Code Cloud, ChatGPT Code Interpreter) often block this host;
-              use the MCP tab from claude.ai instead.
+              Paste into local Claude Code. For claude.ai, use the MCP tab instead.
             </p>
           </TabsContent>
 
