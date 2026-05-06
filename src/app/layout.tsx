@@ -23,21 +23,21 @@ const notoSerifSC = Noto_Serif_SC({
 });
 
 export const metadata: Metadata = {
-  title: "Stop sending different PDFs. Send cv.pro",
+  title: "cv.pro",
   description:
-    "One live URL, many tailored views. Send cv.pro/<you>?for=openai or ?role=ml or ?at=2025 — your resume, contextualized per audience, no PDF attachment needed.",
+    "One live URL, many tailored views. Send cv.pro/<you>?company=openai or ?role=designer — your resume, targeted per audience, no PDF attachment needed.",
   metadataBase: new URL("https://cv.ha7ch.com"),
   openGraph: {
-    title: "Stop sending different PDFs. Send cv.pro",
+    title: "cv.pro",
     description:
-      "One live URL, many tailored views. Send cv.pro/<you>?for=openai or ?role=ml or ?at=2025.",
+      "One live URL, many tailored views. Send cv.pro/<you>?company=openai or ?role=designer.",
     url: "https://cv.ha7ch.com",
-    siteName: "cv-pro",
+    siteName: "cv.pro",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Stop sending different PDFs. Send cv.pro",
+    title: "cv.pro",
     description:
       "One live URL, many tailored views.",
   },
