@@ -261,7 +261,7 @@ function error(s: string) {
   return { content: [{ type: "text" as const, text: s }], isError: true };
 }
 
-function variantReminder(username: string): string {
+function variantReminder(_username: string): string {
   return (
     `\nNext step: ask the user "Do you have a job description? I can create a tailored variant."\n` +
     `Then use set_variant to store a complete targeted resume.\n` +
