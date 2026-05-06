@@ -316,7 +316,7 @@ export default function RegisterFlow() {
           <TabsContent value="cli" className="mt-4 space-y-2">
             <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} wrap />
             <p className="text-xs text-muted-foreground">
-              Copy and paste into any AI coding assistant — no setup needed.
+              Copy and paste into Claude Code, Codex, or Cursor — no setup needed.
             </p>
           </TabsContent>
 
