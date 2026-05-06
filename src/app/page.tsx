@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-16 md:py-24">
       <h1 className="font-serif text-4xl md:text-5xl tracking-tight leading-[1.1]">
-        One resume.<br />Many targeted views.
+        Stop sending different PDFs.
       </h1>
       <div className="mt-6 inline-flex whitespace-pre-wrap font-mono text-base md:text-xl text-muted-foreground">
         Send cv.pro/lawted
