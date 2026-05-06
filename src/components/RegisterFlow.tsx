@@ -218,7 +218,7 @@ export default function RegisterFlow() {
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <h2 className="font-serif text-2xl tracking-tight">
-            {takenHandle ? "Welcome back" : "Step 1 · Create your online CV"}
+            Step 1 · Create your online CV
           </h2>
 
           <div className="space-y-2">
@@ -252,7 +252,9 @@ export default function RegisterFlow() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {takenHandle ? "taken · welcome back" : "Choose a username for your page."}
+              {takenHandle
+                ? "taken — try another, or paste your token in Step 2 if it's yours"
+                : "Choose a username for your page."}
             </p>
           </div>
 
