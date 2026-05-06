@@ -252,16 +252,11 @@ export default function RegisterFlow() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Choose a username for your page.
+              {takenHandle ? "taken · welcome back" : "Choose a username for your page."}
             </p>
           </div>
 
           {error && !takenHandle && <p className="text-sm text-destructive">{error}</p>}
-          {takenHandle && (
-            <p className="text-sm text-muted-foreground pt-1">
-              <span className="font-mono">@{takenHandle}</span> is taken — paste your token in Step 2 to log back in.
-            </p>
-          )}
         </form>
       )}
 
