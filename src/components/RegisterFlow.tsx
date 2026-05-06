@@ -244,37 +244,36 @@ export default function RegisterFlow() {
                   autoFocus
                   className="min-w-0 flex-1 bg-transparent font-mono outline-none placeholder:text-muted-foreground/60"
                 />
+                {takenHandle && (
+                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold leading-none text-white">✕</span>
+                )}
               </div>
-              <Button
-                type="submit"
-                disabled={loading || !handle}
-                className="h-10 w-full sm:w-auto"
-              >
-                {loading ? "Claiming…" : "Get token →"}
-              </Button>
+              {takenHandle && !claimingOwn ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setClaimingOwn(true)}
+                  className="h-10 w-full sm:w-auto"
+                >
+                  but it&apos;s mine
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={loading || !handle || !!takenHandle}
+                  className="h-10 w-full sm:w-auto"
+                >
+                  {loading ? "Claiming…" : "Get token →"}
+                </Button>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
-              {takenHandle ? "" : "Choose a username for your page."}
+              Choose a username for your page.
             </p>
           </div>
 
           {error && !takenHandle && <p className="text-sm text-destructive">{error}</p>}
 
-          {takenHandle && !claimingOwn && (
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-sm text-muted-foreground">
-                <span className="font-mono">@{takenHandle}</span> is taken
-              </span>
-              <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold leading-none text-white">✕</span>
-              <button
-                type="button"
-                onClick={() => setClaimingOwn(true)}
-                className="text-sm underline underline-offset-2 hover:text-muted-foreground transition-colors"
-              >
-                but it&apos;s mine
-              </button>
-            </div>
-          )}
         </form>
       )}
 
