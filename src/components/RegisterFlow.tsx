@@ -82,6 +82,7 @@ export default function RegisterFlow() {
   const [copied, setCopied] = useState<string | null>(null);
   const [mcpClient, setMcpClient] = useState<McpClient>("claude");
   const [takenHandle, setTakenHandle] = useState<string | null>(null);
+  const [claimingOwn, setClaimingOwn] = useState(false);
   const [token, setToken] = useState("");
   const [tokenLoading, setTokenLoading] = useState(false);
   const [tokenError, setTokenError] = useState("");
@@ -234,6 +235,7 @@ export default function RegisterFlow() {
                     setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
                     setError("");
                     setTakenHandle(null);
+                    setClaimingOwn(false);
                     setTokenError("");
                   }}
                   placeholder="yourname"
@@ -252,20 +254,35 @@ export default function RegisterFlow() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {takenHandle ? "taken · yours?" : "Choose a username for your page."}
+              {takenHandle ? "" : "Choose a username for your page."}
             </p>
           </div>
 
           {error && !takenHandle && <p className="text-sm text-destructive">{error}</p>}
+
+          {takenHandle && !claimingOwn && (
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-mono">@{takenHandle}</span> is taken.
+              </p>
+              <button
+                type="button"
+                onClick={() => setClaimingOwn(true)}
+                className="text-sm underline underline-offset-2 hover:text-muted-foreground transition-colors"
+              >
+                It&apos;s mine →
+              </button>
+            </div>
+          )}
         </form>
       )}
 
       {/* Step 2 - Save your token */}
       <div className="space-y-2">
         <h3 className="font-serif text-2xl tracking-tight">
-          {takenHandle && !result ? "Back already?" : "Step 2 · Save your token"}
+          {claimingOwn && !result ? "Back already?" : "Step 2 · Save your token"}
         </h3>
-        {takenHandle && !result ? (
+        {claimingOwn && !result ? (
           <>
             <div className="overflow-hidden rounded-md border bg-muted">
               <div className="flex items-center justify-end gap-0.5 px-1.5 py-1">
