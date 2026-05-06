@@ -56,14 +56,14 @@ export default function Home() {
           </p>
         </div>
         <div
-          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted"
+          className="mt-3 h-2 w-full overflow-hidden rounded-full bg-border"
           role="progressbar"
           aria-valuenow={Math.round(fundingPercent)}
           aria-valuemin={0}
           aria-valuemax={100}
         >
           <div
-            className="h-full min-w-0.5 bg-foreground transition-[width] duration-700 ease-out"
+            className="h-full bg-foreground transition-[width] duration-700 ease-out"
             style={{ width: `${fundingPercent}%` }}
           />
         </div>
