@@ -141,13 +141,20 @@ async function ResumePageContent({
 
   const url = searchParamsToURLSearchParams(sp);
 
-  for (const key of VARIANT_PARAM_ORDER) {
-    const val = url.get(key);
-    if (!val) continue;
+  // Collect present param values in priority order
+  const paramValues = VARIANT_PARAM_ORDER.map((k) => url.get(k)).filter(Boolean) as string[];
+
+  // Try compound key first (e.g. "designer-en" for ?role=designer&lang=en)
+  if (paramValues.length > 1) {
+    const compoundKey = paramValues.join("-");
+    const variant = await getVariantByAudience(username, compoundKey);
+    if (variant) return renderResume(variant);
+  }
+
+  // Fall back to individual keys in priority order
+  for (const val of paramValues) {
     const variant = await getVariantByAudience(username, val);
-    if (variant) {
-      return renderResume(variant);
-    }
+    if (variant) return renderResume(variant);
   }
 
   const result = applyResumeFilters(resume, url);
