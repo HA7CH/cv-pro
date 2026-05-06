@@ -221,8 +221,8 @@ export default function RegisterFlow() {
           </h2>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="flex h-9 min-w-0 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
                 <span className="select-none font-mono text-muted-foreground">
                   cv.ha7ch.com/
                 </span>
@@ -239,10 +239,14 @@ export default function RegisterFlow() {
                   maxLength={30}
                   required
                   autoFocus
-                  className="flex-1 bg-transparent font-mono outline-none placeholder:text-muted-foreground/60"
+                  className="min-w-0 flex-1 bg-transparent font-mono outline-none placeholder:text-muted-foreground/60"
                 />
               </div>
-              <Button type="submit" disabled={loading || !handle}>
+              <Button
+                type="submit"
+                disabled={loading || !handle}
+                className="w-full sm:w-auto"
+              >
                 {loading ? "…" : "Get token →"}
               </Button>
             </div>
