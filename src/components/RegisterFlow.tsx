@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface SavedData { handle: string; token: string }
@@ -268,33 +268,33 @@ export default function RegisterFlow() {
       {/* Step 2 - Save your token */}
       <div className="space-y-2">
         <h3 className="font-serif text-2xl tracking-tight">
-          Step 2 · Save your token
+          {takenHandle && !result ? "Step 2 · Paste your token" : "Step 2 · Save your token"}
         </h3>
         {takenHandle && !result ? (
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Input
+          <>
+            <div className="overflow-hidden rounded-md border bg-muted">
+              <div className="flex items-center justify-end gap-0.5 px-1.5 py-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:bg-background/60 hover:text-foreground"
+                  onClick={() => loginWithToken()}
+                  disabled={tokenLoading || !token.trim()}
+                >
+                  {tokenLoading ? "Verifying…" : "Log in →"}
+                </Button>
+              </div>
+              <input
                 value={token}
                 onChange={(e) => { setToken(e.target.value); setTokenError(""); }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); loginWithToken(); } }}
                 placeholder="cv_pat_..."
-                className="font-mono"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    loginWithToken();
-                  }
-                }}
+                className="w-full bg-transparent px-4 pb-3 pt-0 font-mono text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50"
+                autoFocus
               />
-              <Button
-                type="button"
-                onClick={() => loginWithToken()}
-                disabled={tokenLoading || !token.trim()}
-              >
-                {tokenLoading ? "Verifying…" : "Log in →"}
-              </Button>
             </div>
             {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
-          </div>
+          </>
         ) : (
           <>
             <CodeBlock value={tokenDisplay} id="token" copied={copied} onCopy={copy} />
