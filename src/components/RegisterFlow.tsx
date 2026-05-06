@@ -356,7 +356,8 @@ export default function RegisterFlow() {
       {/* Step 4 - Dashboard */}
       <div className="space-y-2">
         <h3 className="font-serif text-2xl tracking-tight">
-          Step 4 · View your variants
+          Step 4 · View your dashboard{" "}
+          <span className="text-muted-foreground text-xl">(optional)</span>
         </h3>
         {result ? (
           <Link
