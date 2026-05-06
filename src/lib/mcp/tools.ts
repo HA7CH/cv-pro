@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { getResumeByUsername, upsertResume } from "@/lib/resume-store";
+import { getResumeByUsername, upsertResume, getVariantByAudience, upsertVariant, deleteVariant, listVariants } from "@/lib/resume-store";
 import { RESUME_SCHEMA_TEXT } from "@/lib/schema-doc";
 import {
   type ResumeData,
@@ -29,11 +29,17 @@ export const TOOLS = [
       "The 'username' and 'meta' fields are auto-managed — do not send them. " +
       "Required top-level sections: header, personalInfo, experience, education, " +
       "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected — call get_schema first if unsure. " +
-      "\n\nAFTER saving, follow this workflow:\n" +
-      "1. ASK the user: 'Which audience is this resume for? A specific company (e.g. OpenAI), a role (e.g. designer, ML engineer, research), or both?'\n" +
-      "2. Once you know the target, update each relevant experience / project entry's `tags` array via update_section. Use lowercase strings: company name (`'openai'`), role/track (`'designer'`, `'ml'`, `'frontend'`), topic (`'research'`).\n" +
-      "3. After tagging, TELL the user the final shareable URL, e.g. 'Your designer-targeted resume is at cv.ha7ch.com/<user>?role=designer — send this when applying for design roles.'\n" +
-      "Re-running this workflow lets the user maintain one resume but ship multiple targeted views (one URL per company / role / year), no PDFs.",
+      "\n\nAFTER saving the base resume, follow this workflow:\n" +
+      "1. ASK the user: 'Do you have a job description? Paste it and I'll create a tailored version.'\n" +
+      "2. Also ask: 'Which audience is this for? A specific company (e.g. OpenAI), a role (e.g. designer, ML engineer), a language (en/zh), or a combination?'\n" +
+      "3. Call list_variants to show existing variants and offer them as a base.\n" +
+      "4. Rewrite relevant bullets/descriptions based on the JD and target audience.\n" +
+      "5. Call set_variant with the audience key and the full tailored ResumeData.\n" +
+      "6. Tell the user their shareable URL:\n" +
+      "   • company: cv.ha7ch.com/<user>?company=openai\n" +
+      "   • role: cv.ha7ch.com/<user>?role=designer\n" +
+      "   • language: cv.ha7ch.com/<user>?lang=en\n" +
+      "One base resume, many tailored variants — one URL per company/role/language.",
     inputSchema: {
       type: "object",
       properties: {
@@ -57,6 +63,55 @@ export const TOOLS = [
         value: { description: "The new value for that section." },
       },
       required: ["section", "value"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "list_variants",
+    description: "List all stored resume variants for the authenticated user. Returns audience keys and their URLs. Call this to show users what targeted versions they have, and to offer base options when creating a new variant.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
+    name: "get_variant",
+    description: "Fetch a specific variant's full resume JSON by audience key (e.g. 'openai', 'designer', 'en'). Use this to read an existing variant before creating a derived one.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        audience: { type: "string", description: "The variant key, e.g. 'openai', 'designer', 'ml', 'en', 'zh'" },
+      },
+      required: ["audience"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "set_variant",
+    description:
+      "Store a complete tailored resume as a named variant. Use after rewriting bullets/descriptions based on a JD or target audience.\n\n" +
+      "audience: the variant key — lowercase, no spaces (e.g. 'openai', 'designer', 'ml', 'en', 'zh').\n" +
+      "data: full ResumeData object (same schema as update_resume, without username/meta).\n\n" +
+      "After saving, tell the user their shareable URL:\n" +
+      "  • company variant → cv.ha7ch.com/<user>?company=openai\n" +
+      "  • role variant → cv.ha7ch.com/<user>?role=designer\n" +
+      "  • language variant → cv.ha7ch.com/<user>?lang=en",
+    inputSchema: {
+      type: "object",
+      properties: {
+        audience: { type: "string", description: "Variant key, e.g. 'openai', 'designer', 'en'" },
+        data: { type: "object", description: "Full ResumeData (without username/meta)" },
+      },
+      required: ["audience", "data"],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "delete_variant",
+    description: "Delete a stored variant by audience key.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        audience: { type: "string" },
+      },
+      required: ["audience"],
       additionalProperties: false,
     },
   },
@@ -99,7 +154,7 @@ export async function dispatchTool(
         const saved = await upsertResume(result.data);
         return text(
           `Resume saved. View at /${ctx.username}.\n\n` +
-          tagReminder(saved, ctx.username) +
+          variantReminder(ctx.username) +
           `\nStored data:\n${JSON.stringify(saved, null, 2)}`,
         );
       }
@@ -125,11 +180,54 @@ export async function dispatchTool(
           username: ctx.username,
         };
         await upsertResume(next);
-        const after =
-          (await getResumeByUsername(ctx.username)) ?? next;
+        return text(`Section '${section}' updated.`);
+      }
+
+      case "list_variants": {
+        const variants = await listVariants(ctx.username);
+        if (variants.length === 0) {
+          return text("No variants yet. Use set_variant to create a tailored version.");
+        }
+        const lines = variants.map(({ audience, updatedAt }) => {
+          const url = `cv.ha7ch.com/${ctx.username}?company=${audience}`;
+          return `  • ${audience} (updated ${updatedAt.slice(0, 10)}) — ${url}`;
+        });
+        return text(`Stored variants:\n${lines.join("\n")}`);
+      }
+
+      case "get_variant": {
+        const audience = String(args.audience ?? "");
+        if (!audience) return error("Missing 'audience'.");
+        const variant = await getVariantByAudience(ctx.username, audience);
+        if (!variant) return error(`No variant found for '${audience}'.`);
+        return text(JSON.stringify(variant, null, 2));
+      }
+
+      case "set_variant": {
+        const audience = String(args.audience ?? "").toLowerCase().trim();
+        if (!audience) return error("Missing 'audience'.");
+        if (!args.data || typeof args.data !== "object") return error("Missing 'data' object.");
+        const merged = {
+          ...(args.data as Record<string, unknown>),
+          username: ctx.username,
+          meta: { updatedAt: new Date().toISOString() },
+        };
+        const result = resumeSchema.safeParse(merged);
+        if (!result.success) return error(`Invalid resume:\n${formatIssues(result.error)}`);
+        await upsertVariant(ctx.username, audience, result.data);
+        const urlParam = audience.length === 2 ? `lang=${audience}` : `company=${audience}`;
         return text(
-          `Section '${section}' updated.\n\n` + tagReminder(after, ctx.username),
+          `Variant '${audience}' saved.\n` +
+          `Share at: cv.ha7ch.com/${ctx.username}?${urlParam}\n\n` +
+          `(Use ?role=${audience} or ?focus=${audience} if this is a role/topic variant.)`
         );
+      }
+
+      case "delete_variant": {
+        const audience = String(args.audience ?? "");
+        if (!audience) return error("Missing 'audience'.");
+        await deleteVariant(ctx.username, audience);
+        return text(`Variant '${audience}' deleted.`);
       }
 
       default:
@@ -163,64 +261,12 @@ function error(s: string) {
   return { content: [{ type: "text" as const, text: s }], isError: true };
 }
 
-/**
- * Builds an instruction string the agent will see in the tool response,
- * nudging it to ask the user about tags. Tailored: lists which entries
- * already have tags vs which don't, so the agent can suggest tagging
- * specific ones.
- */
-function tagReminder(resume: ResumeData, username: string): string {
-  const lines: string[] = [];
-  lines.push(
-    `NEXT STEP — ASK the user: "Which audience is this resume for? ` +
-      `A specific company (e.g. OpenAI), a role (e.g. designer, ML, ` +
-      `research), or both?" Then tag the entries below to match.`,
+function variantReminder(username: string): string {
+  return (
+    `\nNext step: ask the user "Do you have a job description? I can create a tailored variant."\n` +
+    `Then use set_variant to store a complete targeted resume.\n` +
+    `Shareable URLs: ?company=<name>  ?role=<track>  ?focus=<topic>  ?lang=en|zh`
   );
-
-  const untaggedExperience = resume.experience.filter(
-    (e) => !e.tags || e.tags.length === 0,
-  );
-  const untaggedProjects = [
-    ...resume.projectsRecent.filter((p) => !p.tags || p.tags.length === 0),
-    ...resume.projectsDetailed.filter((p) => !p.tags || p.tags.length === 0),
-  ];
-
-  if (untaggedExperience.length > 0) {
-    lines.push("");
-    lines.push("Experience entries without tags:");
-    for (const exp of untaggedExperience) {
-      lines.push(`  • ${exp.role} at ${exp.company}`);
-    }
-  }
-  if (untaggedProjects.length > 0) {
-    lines.push("");
-    lines.push("Project entries without tags:");
-    for (const p of untaggedProjects) {
-      const t = "title" in p ? (p as { title: string }).title : "(untitled)";
-      lines.push(`  • ${t}`);
-    }
-  }
-
-  if (untaggedExperience.length === 0 && untaggedProjects.length === 0) {
-    lines.push("");
-    lines.push(
-      "(All entries already have tags — confirm they still match the user's intent.)",
-    );
-  }
-
-  lines.push("");
-  lines.push("Tag conventions (lowercase):");
-  lines.push("  • Company name (e.g. 'openai') → matched by ?for=openai");
-  lines.push("  • Role/track (e.g. 'designer', 'ml') → matched by ?role=designer");
-  lines.push("  • Topic (e.g. 'research', 'systems') → matched by ?focus=research");
-  lines.push("");
-  lines.push(
-    `Use update_section to write tags. After tagging, tell the user the final URL:`,
-  );
-  lines.push(
-    `  e.g. "Your design-track resume is at cv.ha7ch.com/${username}?role=designer — send this when applying."`,
-  );
-  return lines.join("\n");
 }
 
 function emptyResume(username: string): ResumeData {
