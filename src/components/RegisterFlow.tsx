@@ -309,14 +309,14 @@ export default function RegisterFlow() {
         </h3>
         <Tabs defaultValue="cli">
           <TabsList className="w-fit">
-            <TabsTrigger value="cli">Claude Code / Codex</TabsTrigger>
+            <TabsTrigger value="cli">Quick start</TabsTrigger>
             <TabsTrigger value="mcp">MCP</TabsTrigger>
           </TabsList>
 
           <TabsContent value="cli" className="mt-4 space-y-2">
             <CodeBlock value={cliPrompt} id="cli" copied={copied} onCopy={copy} wrap />
             <p className="text-xs text-muted-foreground">
-              Paste into Claude Code or Codex. For claude.ai, use the MCP tab instead.
+              Copy and paste into any AI coding assistant — no setup needed.
             </p>
           </TabsContent>
 
