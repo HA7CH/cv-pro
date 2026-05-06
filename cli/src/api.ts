@@ -126,3 +126,31 @@ export async function getSchema(apiBase: string): Promise<{ json: unknown; text:
   if (!res.ok) await throwServerError(res);
   return res.json();
 }
+
+export async function listVariants(cfg: AuthConfig): Promise<{ audience: string; updatedAt: string }[]> {
+  const res = await req(cfg, "/api/v1/variants");
+  if (!res.ok) await throwServerError(res);
+  return res.json();
+}
+
+export async function getVariant(cfg: AuthConfig, audience: string): Promise<unknown> {
+  const res = await req(cfg, `/api/v1/variants/${encodeURIComponent(audience)}`);
+  if (!res.ok) await throwServerError(res);
+  return res.json();
+}
+
+export async function putVariant(cfg: AuthConfig, audience: string, data: unknown): Promise<unknown> {
+  const res = await req(cfg, `/api/v1/variants/${encodeURIComponent(audience)}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) await throwServerError(res);
+  return res.json();
+}
+
+export async function deleteVariant(cfg: AuthConfig, audience: string): Promise<void> {
+  const res = await req(cfg, `/api/v1/variants/${encodeURIComponent(audience)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) await throwServerError(res);
+}
