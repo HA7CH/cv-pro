@@ -378,17 +378,6 @@ export default function RegisterFlow() {
         </p>
       </div>
 
-      {/* Live page link */}
-      {result && (
-        <Link
-          href={`/${result.handle}`}
-          target="_blank"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          cv.ha7ch.com/{result.handle}
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
-      )}
     </div>
   );
 }
