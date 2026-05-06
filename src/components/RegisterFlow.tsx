@@ -280,7 +280,7 @@ export default function RegisterFlow() {
       {/* Step 2 - Save your token */}
       <div className="space-y-2">
         <h3 className="font-serif text-2xl tracking-tight">
-          {claimingOwn && !result ? "HOHOHO, welcome back" : "Step 2 · Save your token"}
+          {claimingOwn && !result ? "Ho ho ho, welcome back" : "Step 2 · Save your token"}
         </h3>
         {claimingOwn && !result ? (
           <>
