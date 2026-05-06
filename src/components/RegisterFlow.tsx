@@ -69,16 +69,8 @@ function buildCliPrompt(token: string): string {
   return (
     `Update my resume at cv.ha7ch.com.\n\n` +
     `Run first: npx cv-pro@latest login ${token}\n\n` +
-    `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
-    `Run npx cv-pro@latest --help if needed. Ask if unclear.\n\n` +
-    `After saving, run this workflow:\n` +
-    `1. ASK me: "Do you have a job description? Paste it and I'll create a tailored version."\n` +
-    `2. ASK me: "Which audience? Specific company (e.g. OpenAI), role (e.g. designer, ML), language (en/zh), or a combination?"\n` +
-    `3. Call list_variants to show existing variants and offer them as a starting base.\n` +
-    `4. Rewrite bullets and descriptions based on the JD and target audience.\n` +
-    `5. Store as a variant using set_variant, e.g. audience key "openai".\n` +
-    `6. Tell me the shareable URL, e.g. "Your OpenAI resume is at cv.ha7ch.com/<me>?company=openai — send that when applying."\n\n` +
-    `One resume, many targeted variants — one URL per company/role/language, no separate PDFs.`
+    `Then help me update my resume — I'll give you a PDF, paste text, or describe changes.\n\n` +
+    `After saving, ask if I have a job description. If yes, create a tailored variant for that company or role and give me the shareable link.`
   );
 }
 
@@ -317,7 +309,7 @@ export default function RegisterFlow() {
         </h3>
         <Tabs defaultValue="cli">
           <TabsList className="w-fit">
-            <TabsTrigger value="cli">CLI</TabsTrigger>
+            <TabsTrigger value="cli">Claude Code</TabsTrigger>
             <TabsTrigger value="mcp">MCP</TabsTrigger>
           </TabsList>
 
