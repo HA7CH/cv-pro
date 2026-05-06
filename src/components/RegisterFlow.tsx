@@ -215,6 +215,7 @@ export default function RegisterFlow() {
               switch account
             </button>
           </div>
+          <p className="text-xs text-muted-foreground">Your resume is live. Share this link.</p>
         </div>
       ) : (
         <form onSubmit={submit} className="space-y-4">
@@ -311,11 +312,9 @@ export default function RegisterFlow() {
         ) : (
           <>
             <CodeBlock value={tokenDisplay} id="token" copied={copied} onCopy={copy} />
-            {!result && (
-              <p className="text-xs text-muted-foreground">
-                Your real token appears here after Step 1.
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">
+              {result ? "Keep this safe — it's your only way back in." : "Your real token appears here after Step 1."}
+            </p>
           </>
         )}
       </div>
