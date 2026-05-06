@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
-import { register, whoami, getResume, putResume, patchSection, getSchema } from "./api.js";
+import { register, whoami, getResume, putResume, patchSection, getSchema, listVariants, getVariant, putVariant, deleteVariant } from "./api.js";
 
-const VERSION = "0.4.0";
+const VERSION = "0.5.0";
 
-function printTagReminder(apiBase: string, handle: string | undefined) {
+function printVariantReminder(apiBase: string, handle: string | undefined) {
   if (!handle) return;
   console.log("");
-  console.log("Tip — to ship audience-targeted views, add a `tags` array");
-  console.log("to each relevant experience / project entry:");
+  console.log("Tip — create tailored variants for each audience:");
   console.log("");
-  console.log("  • Company target (e.g. tags: [\"openai\"]) — share via");
-  console.log(`    ${apiBase}/${handle}?for=openai`);
-  console.log("  • Role target (e.g. tags: [\"designer\", \"frontend\"]) — share via");
+  console.log("  • Company variant  → share via");
+  console.log(`    ${apiBase}/${handle}?company=openai`);
+  console.log("  • Role variant     → share via");
   console.log(`    ${apiBase}/${handle}?role=designer`);
-  console.log("  • Year slice — share via");
-  console.log(`    ${apiBase}/${handle}?at=2026`);
+  console.log("  • Language variant → share via");
+  console.log(`    ${apiBase}/${handle}?lang=en`);
   console.log("");
-  console.log(`See ${apiBase}/llms.txt for the full tagging convention.`);
+  console.log(`Use 'cv-pro set-variant <key> [file]' to store a tailored version.`);
+  console.log(`See ${apiBase}/llms.txt for the full variant workflow.`);
 }
 
 const HELP = `
@@ -36,7 +36,11 @@ COMMANDS
   get                         Print current resume as JSON
   update [file]               Replace entire resume from a JSON file (or stdin)
   update-section <section>    Update one section from JSON file (or stdin)
-  open [--json]               Open your live resume page (or its raw JSON) in the browser
+  variants                    List all stored variants with links
+  get-variant <key>           Print variant JSON
+  set-variant <key> [file]    Create/update a variant from file or stdin
+  delete-variant <key>        Delete a variant
+  open [--json] [--variant=<key>]  Open resume page in browser
 
 SECTIONS
   header, personalInfo, experience, education,
@@ -51,6 +55,9 @@ EXAMPLES
   cv-pro update resume.json
   cv-pro update-section experience experience.json
   echo '{"name":"Lawted"}' | cv update-section header
+  cv-pro set-variant openai resume_openai.json
+  cv-pro variants
+  cv-pro open --variant=openai
 
 ENV
   CV_TOKEN   token (overrides saved config)
@@ -165,7 +172,7 @@ async function main() {
     process.stdout.write("Updating resume… ");
     await putResume(config, data);
     console.log(`✓\nView at ${config.apiBase}/${config.handle}`);
-    printTagReminder(config.apiBase, config.handle);
+    printVariantReminder(config.apiBase, config.handle);
     return;
   }
 
@@ -177,22 +184,77 @@ async function main() {
     await patchSection(config, section, value);
     console.log(`✓\nView at ${config.apiBase}/${config.handle}`);
     if (section === "experience" || section === "projectsRecent" || section === "projectsDetailed") {
-      printTagReminder(config.apiBase, config.handle);
+      printVariantReminder(config.apiBase, config.handle);
     }
     return;
   }
 
   if (cmd === "open") {
     const wantJson = args.slice(1).includes("--json");
+    const variantArg = args.slice(1).find(a => a.startsWith("--variant="));
+    const variantKey = variantArg?.slice("--variant=".length);
+
+    let url: string;
+    if (variantKey) {
+      url = `${config.apiBase}/${config.handle}?company=${variantKey}`;
+    } else if (wantJson) {
+      url = `${config.apiBase}/${config.handle}.json`;
+    } else {
+      url = `${config.apiBase}/${config.handle}`;
+    }
     const { execSync } = await import("node:child_process");
-    const url = wantJson
-      ? `${config.apiBase}/${config.handle}.json`
-      : `${config.apiBase}/${config.handle}`;
     const opener =
       process.platform === "darwin" ? "open" :
       process.platform === "win32" ? "start" : "xdg-open";
     execSync(`${opener} "${url}"`);
     console.log(url);
+    return;
+  }
+
+  if (cmd === "variants") {
+    const variants = await listVariants(config);
+    if (variants.length === 0) {
+      console.log("No variants yet. Use 'cv-pro set-variant <key> [file]' to create one.");
+      return;
+    }
+    console.log("Stored variants:\n");
+    for (const { audience, updatedAt } of variants) {
+      const date = updatedAt.slice(0, 10);
+      console.log(`  ${audience.padEnd(16)} updated ${date}`);
+      console.log(`    ?company=${audience}  →  ${config.apiBase}/${config.handle}?company=${audience}`);
+      console.log(`    ?role=${audience}     →  ${config.apiBase}/${config.handle}?role=${audience}`);
+      console.log(`    ?lang=${audience}     →  ${config.apiBase}/${config.handle}?lang=${audience}`);
+      console.log("");
+    }
+    return;
+  }
+
+  if (cmd === "get-variant") {
+    const key = args[1];
+    if (!key) die("Usage: cv-pro get-variant <key>");
+    const data = await getVariant(config, key);
+    console.log(JSON.stringify(data, null, 2));
+    return;
+  }
+
+  if (cmd === "set-variant") {
+    const key = args[1];
+    if (!key) die("Usage: cv-pro set-variant <key> [file]");
+    const data = readJsonArg(args[2], `variant '${key}'`);
+    process.stdout.write(`Saving variant '${key}'… `);
+    await putVariant(config, key, data);
+    console.log(`✓`);
+    console.log(`View at ${config.apiBase}/${config.handle}?company=${key}`);
+    console.log(`(Also works with ?role=${key} or ?lang=${key})`);
+    return;
+  }
+
+  if (cmd === "delete-variant") {
+    const key = args[1];
+    if (!key) die("Usage: cv-pro delete-variant <key>");
+    process.stdout.write(`Deleting variant '${key}'… `);
+    await deleteVariant(config, key);
+    console.log("✓");
     return;
   }
 
