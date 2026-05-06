@@ -93,6 +93,20 @@ export function applyResumeFilters(
     filtered.projectsRecent.length +
     filtered.projectsDetailed.length;
 
+  // Recipient safety: if the filter wiped out everything filterable
+  // (sender mistyped a tag, or simply no entry matches), don't show
+  // the recipient a broken stub. Fall back to the unfiltered resume —
+  // the URL still acts as a private label for the sender, but the
+  // recipient sees a complete page instead of a "skills only" husk.
+  if (totalAfter === 0 && totalBefore > 0) {
+    return {
+      resume,
+      active: false,
+      filters: { tags: [] },
+      totals: { before: totalBefore, after: totalBefore },
+    };
+  }
+
   return {
     resume: filtered,
     active: true,
