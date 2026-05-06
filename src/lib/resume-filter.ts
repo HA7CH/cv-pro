@@ -18,12 +18,6 @@ export interface FilterResult {
   totals: { before: number; after: number };
 }
 
-/** Banner data passed from server page → ResumeView/ResumeTemplate. */
-export interface ResumeViewBanner {
-  filters: AppliedFilters;
-  totals: { before: number; after: number };
-  username: string;
-}
 
 const TAG_KEYS = ["for", "role", "focus"] as const;
 

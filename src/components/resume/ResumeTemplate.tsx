@@ -1,15 +1,8 @@
 import type { ResumeData } from "@/types/resume";
-import type { ResumeViewBanner } from "@/lib/resume-filter";
 
 const CJK_RE = /[㐀-鿿豈-﫿]/;
 
-export default function ResumeTemplate({
-  data,
-  banner,
-}: {
-  data: ResumeData;
-  banner?: ResumeViewBanner | null;
-}) {
+export default function ResumeTemplate({ data }: { data: ResumeData }) {
   const headerLinks: Array<{ label: string; href?: string }> = [];
   if (data.personalInfo.phone) {
     headerLinks.push({ label: data.personalInfo.phone, href: `tel:${data.personalInfo.phone}` });
@@ -54,37 +47,6 @@ export default function ResumeTemplate({
       </header>
 
       <hr className="mt-6 mb-8 border-zinc-200" />
-
-      {banner && (
-        <div className="-mt-4 mb-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[12px] text-zinc-500">
-          {banner.filters.tags.length > 0 && (
-            <span className="font-mono">
-              tag={banner.filters.tags.join(",")}
-            </span>
-          )}
-          {banner.filters.year && (
-            <>
-              {banner.filters.tags.length > 0 && <span aria-hidden>·</span>}
-              <span className="font-mono">at={banner.filters.year}</span>
-            </>
-          )}
-          <span aria-hidden>·</span>
-          <span>
-            <span className="tabular-nums font-medium text-zinc-900">
-              {banner.totals.after}
-            </span>{" "}
-            of <span className="tabular-nums">{banner.totals.before}</span>{" "}
-            entries
-          </span>
-          <span aria-hidden>·</span>
-          <a
-            href={`/${banner.username}`}
-            className="underline underline-offset-2 hover:text-zinc-900"
-          >
-            Show all
-          </a>
-        </div>
-      )}
 
       {data.education.length > 0 && (
         <Section title="Education" italic={isCJK}>

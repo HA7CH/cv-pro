@@ -5,15 +5,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import ResumeTemplate from "./ResumeTemplate";
 import type { ResumeData } from "@/types/resume";
-import type { ResumeViewBanner } from "@/lib/resume-filter";
 
-export default function ResumeView({
-  data,
-  banner,
-}: {
-  data: ResumeData;
-  banner?: ResumeViewBanner | null;
-}) {
+export default function ResumeView({ data }: { data: ResumeData }) {
   const params = useSearchParams();
   const pathname = usePathname();
   const isJSON = params.get("view") === "json";
@@ -49,7 +42,7 @@ export default function ResumeView({
         </Link>
       </nav>
 
-      {isJSON ? <ResumeJSON data={data} /> : <ResumeTemplate data={data} banner={banner} />}
+      {isJSON ? <ResumeJSON data={data} /> : <ResumeTemplate data={data} />}
     </div>
   );
 }

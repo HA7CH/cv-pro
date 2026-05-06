@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import ResumeTemplate from "@/components/resume/ResumeTemplate";
 import ResumeView from "@/components/resume/ResumeView";
 import { getResumeByUsername } from "@/lib/resume-store";
-import { applyResumeFilters, type AppliedFilters } from "@/lib/resume-filter";
+import { applyResumeFilters } from "@/lib/resume-filter";
 import type { ResumeData } from "@/types/resume";
 
 type RouteParams = { username: string };
@@ -22,12 +22,6 @@ function searchParamsToURLSearchParams(sp: SearchParams): URLSearchParams {
     else if (Array.isArray(v) && v.length) url.set(k, v[0]);
   }
   return url;
-}
-
-export interface ResumeViewBanner {
-  filters: AppliedFilters;
-  totals: { before: number; after: number };
-  username: string;
 }
 
 function buildDescription(resume: ResumeData, username: string): string {
@@ -116,9 +110,6 @@ export default async function UserResumePage({
 
   const url = searchParamsToURLSearchParams(sp);
   const result = applyResumeFilters(resume, url);
-  const banner: ResumeViewBanner | null = result.active
-    ? { filters: result.filters, totals: result.totals, username }
-    : null;
 
   const schema = buildPersonSchema(result.resume);
   return (
@@ -129,8 +120,8 @@ export default async function UserResumePage({
           __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
         }}
       />
-      <Suspense fallback={<ResumeTemplate data={result.resume} banner={banner} />}>
-        <ResumeView data={result.resume} banner={banner} />
+      <Suspense fallback={<ResumeTemplate data={result.resume} />}>
+        <ResumeView data={result.resume} />
       </Suspense>
     </>
   );

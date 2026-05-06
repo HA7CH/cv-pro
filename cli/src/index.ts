@@ -3,7 +3,23 @@ import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
 import { register, whoami, getResume, putResume, patchSection, getSchema } from "./api.js";
 
-const VERSION = "0.2.7";
+const VERSION = "0.4.0";
+
+function printTagReminder(apiBase: string, handle: string | undefined) {
+  if (!handle) return;
+  console.log("");
+  console.log("Tip — to ship audience-targeted views, add a `tags` array");
+  console.log("to each relevant experience / project entry:");
+  console.log("");
+  console.log("  • Company target (e.g. tags: [\"openai\"]) — share via");
+  console.log(`    ${apiBase}/${handle}?for=openai`);
+  console.log("  • Role target (e.g. tags: [\"designer\", \"frontend\"]) — share via");
+  console.log(`    ${apiBase}/${handle}?role=designer`);
+  console.log("  • Year slice — share via");
+  console.log(`    ${apiBase}/${handle}?at=2026`);
+  console.log("");
+  console.log(`See ${apiBase}/llms.txt for the full tagging convention.`);
+}
 
 const HELP = `
 aicv — AI-native resume CLI  (cv.ha7ch.com)
@@ -149,6 +165,7 @@ async function main() {
     process.stdout.write("Updating resume… ");
     await putResume(config, data);
     console.log(`✓\nView at ${config.apiBase}/${config.handle}`);
+    printTagReminder(config.apiBase, config.handle);
     return;
   }
 
@@ -159,6 +176,9 @@ async function main() {
     process.stdout.write(`Updating ${section}… `);
     await patchSection(config, section, value);
     console.log(`✓\nView at ${config.apiBase}/${config.handle}`);
+    if (section === "experience" || section === "projectsRecent" || section === "projectsDetailed") {
+      printTagReminder(config.apiBase, config.handle);
+    }
     return;
   }
 
