@@ -252,9 +252,7 @@ export default function RegisterFlow() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              {takenHandle
-                ? "taken — try another, or paste your token in Step 2 if it's yours"
-                : "Choose a username for your page."}
+              {takenHandle ? "taken · yours?" : "Choose a username for your page."}
             </p>
           </div>
 
@@ -265,7 +263,7 @@ export default function RegisterFlow() {
       {/* Step 2 - Save your token */}
       <div className="space-y-2">
         <h3 className="font-serif text-2xl tracking-tight">
-          {takenHandle && !result ? "Paste your token" : "Step 2 · Save your token"}
+          {takenHandle && !result ? "Back already?" : "Step 2 · Save your token"}
         </h3>
         {takenHandle && !result ? (
           <>
