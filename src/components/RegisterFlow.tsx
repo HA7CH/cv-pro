@@ -218,7 +218,7 @@ export default function RegisterFlow() {
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <h2 className="font-serif text-2xl tracking-tight">
-            Step 1 · Create your online CV
+            {takenHandle ? "Step 1 · Welcome back" : "Step 1 · Create your online CV"}
           </h2>
 
           <div className="space-y-2">
