@@ -147,3 +147,22 @@
   background-size: 1rem 1rem;
   animation: progress-stripes 0.8s linear infinite;
 }
+
+@page {
+  size: Letter;
+  margin: 0.5in;
+}
+
+@media print {
+  html, body {
+    background: #fff;
+  }
+  main {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+}
