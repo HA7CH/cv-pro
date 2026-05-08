@@ -11,16 +11,17 @@ const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
  * 1) compound key built from all present params in VARIANT_PARAM_ORDER
  * 2) each individual param in VARIANT_PARAM_ORDER
  */
-async function resolveVariant(username: string, paramValues: string[]) {
-  if (paramValues.length === 0) return null;
-  const compoundKey = paramValues.length > 1 ? paramValues.join("-") : null;
-  const candidates = compoundKey ? [compoundKey, ...paramValues] : paramValues;
+async function resolveVariant(username: string, variantParamValues: string[]) {
+  if (variantParamValues.length === 0) return null;
+  // Matches stored audience keys such as "company-role-focus" when multiple params are present.
+  const compoundKey = variantParamValues.length > 1 ? variantParamValues.join("-") : null;
+  const candidates = compoundKey ? [compoundKey, ...variantParamValues] : variantParamValues;
   const variants = await getVariantsByAudiences(username, candidates);
   if (compoundKey) {
     const compound = variants.get(compoundKey);
     if (compound) return compound;
   }
-  for (const value of paramValues) {
+  for (const value of variantParamValues) {
     const variant = variants.get(value);
     if (variant) return variant;
   }
@@ -41,10 +42,10 @@ export async function GET(
   }
 
   const query = req.nextUrl.searchParams;
-  const paramValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(
+  const variantParamValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(
     (value): value is string => value !== null && value.length > 0,
   );
-  const variant = await resolveVariant(username, paramValues);
+  const variant = await resolveVariant(username, variantParamValues);
   const output = variant ?? applyResumeFilters(resume, query).resume;
 
   return NextResponse.json(output, {
