@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { applyResumeFilters } from "@/lib/resume-filter";
-import { getResumeByUsername, getVariantByAudience } from "@/lib/resume-store";
+import { getResumeByUsername, getVariantsByAudiences } from "@/lib/resume-store";
 
 type RouteParams = { username: string };
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
 async function resolveVariant(username: string, paramValues: string[]) {
-  if (paramValues.length > 1) {
-    const compoundKey = paramValues.join("-");
-    const variant = await getVariantByAudience(username, compoundKey);
+  if (paramValues.length === 0) return null;
+  const compoundKey = paramValues.length > 1 ? paramValues.join("-") : null;
+  const candidates = compoundKey ? [compoundKey, ...paramValues] : paramValues;
+  const variants = await getVariantsByAudiences(username, candidates);
+  if (compoundKey) {
+    const compound = variants.get(compoundKey);
+    if (compound) return compound;
+  }
+  for (const value of paramValues) {
+    const variant = variants.get(value);
     if (variant) return variant;
   }
-
-  if (paramValues.length === 0) return null;
-
-  const variants = await Promise.all(
-    paramValues.map((val) => getVariantByAudience(username, val)),
-  );
-
-  return variants.find(Boolean) ?? null;
+  return null;
 }
 
 export async function GET(
