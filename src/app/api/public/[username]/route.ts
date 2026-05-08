@@ -3,8 +3,14 @@ import { applyResumeFilters } from "@/lib/resume-filter";
 import { getResumeByUsername, getVariantsByAudiences } from "@/lib/resume-store";
 
 type RouteParams = { username: string };
+// Higher-priority query keys come first; this order controls fallback matching.
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
+/**
+ * Variant resolution order:
+ * 1) compound key built from all present params in VARIANT_PARAM_ORDER
+ * 2) each individual param in VARIANT_PARAM_ORDER
+ */
 async function resolveVariant(username: string, paramValues: string[]) {
   if (paramValues.length === 0) return null;
   const compoundKey = paramValues.length > 1 ? paramValues.join("-") : null;
