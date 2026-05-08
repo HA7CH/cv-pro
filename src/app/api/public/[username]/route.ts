@@ -5,6 +5,22 @@ import { getResumeByUsername, getVariantByAudience } from "@/lib/resume-store";
 type RouteParams = { username: string };
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
+async function resolveVariant(username: string, paramValues: string[]) {
+  if (paramValues.length > 1) {
+    const compoundKey = paramValues.join("-");
+    const variant = await getVariantByAudience(username, compoundKey);
+    if (variant) return variant;
+  }
+
+  if (paramValues.length === 0) return null;
+
+  const variants = await Promise.all(
+    paramValues.map((val) => getVariantByAudience(username, val)),
+  );
+
+  return variants.find(Boolean) ?? null;
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<RouteParams> },
@@ -20,28 +36,8 @@ export async function GET(
 
   const query = req.nextUrl.searchParams;
   const paramValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(Boolean) as string[];
-
-  let output = resume;
-
-  if (paramValues.length > 1) {
-    const compoundKey = paramValues.join("-");
-    const variant = await getVariantByAudience(username, compoundKey);
-    if (variant) output = variant;
-  }
-
-  if (output === resume) {
-    for (const val of paramValues) {
-      const variant = await getVariantByAudience(username, val);
-      if (variant) {
-        output = variant;
-        break;
-      }
-    }
-  }
-
-  if (output === resume) {
-    output = applyResumeFilters(resume, query).resume;
-  }
+  const variant = await resolveVariant(username, paramValues);
+  const output = variant ?? applyResumeFilters(resume, query).resume;
 
   return NextResponse.json(output, {
     headers: {
