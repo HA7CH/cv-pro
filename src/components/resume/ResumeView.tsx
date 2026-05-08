@@ -10,6 +10,13 @@ export default function ResumeView({ data }: { data: ResumeData }) {
   const params = useSearchParams();
   const pathname = usePathname();
   const isJSON = params.get("view") === "json";
+  const baseParams = new URLSearchParams(params.toString());
+  baseParams.delete("view");
+  const humanQuery = baseParams.toString();
+  const humanHref = humanQuery ? `${pathname}?${humanQuery}` : pathname;
+  const agentParams = new URLSearchParams(baseParams.toString());
+  agentParams.set("view", "json");
+  const agentHref = `${pathname}?${agentParams.toString()}`;
 
   const [pdfMenuOpen, setPdfMenuOpen] = useState(false);
   const [printDensity, setPrintDensity] = useState<ResumeDensity | null>(null);
@@ -60,7 +67,7 @@ export default function ResumeView({ data }: { data: ResumeData }) {
         className="print:hidden absolute left-6 top-6 z-10 flex items-baseline gap-2 text-[11px] uppercase tracking-[0.2em] text-zinc-400 sm:left-10 sm:top-10"
       >
         <Link
-          href={pathname}
+          href={humanHref}
           scroll={false}
           aria-current={!isJSON ? "page" : undefined}
           className={
@@ -73,7 +80,7 @@ export default function ResumeView({ data }: { data: ResumeData }) {
           /
         </span>
         <Link
-          href={`${pathname}?view=json`}
+          href={agentHref}
           scroll={false}
           aria-current={isJSON ? "page" : undefined}
           className={
