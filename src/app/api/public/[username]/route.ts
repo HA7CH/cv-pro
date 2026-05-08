@@ -10,6 +10,8 @@ const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
  * Variant resolution order:
  * 1) compound key built from all present params in VARIANT_PARAM_ORDER
  * 2) each individual param in VARIANT_PARAM_ORDER
+ *
+ * variantParamValues must be the ordered query values extracted by VARIANT_PARAM_ORDER.
  */
 async function resolveVariant(username: string, variantParamValues: string[]) {
   if (variantParamValues.length === 0) return null;
@@ -46,6 +48,7 @@ export async function GET(
     (value): value is string => value !== null && value.length > 0,
   );
   const variant = await resolveVariant(username, variantParamValues);
+  // Variants are pre-tailored payloads; only the base resume uses runtime tag filtering.
   const output = variant ?? applyResumeFilters(resume, query).resume;
 
   return NextResponse.json(output, {
