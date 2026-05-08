@@ -55,7 +55,8 @@ Each `experience` and `projectsDetailed` entry takes a `bullets: string[]` field
 npx cv-pro@latest register <handle>      # claim handle + auto-login (no browser)
 npx cv-pro@latest login cv_pat_...       # save an existing token
 npx cv-pro@latest whoami                 # show handle + page URL
-npx cv-pro@latest get                    # print resume JSON
+npx cv-pro@latest get                    # print current resume JSON
+npx cv-pro@latest get --variant=openai   # print one stored variant JSON
 npx cv-pro@latest update resume.json     # replace full resume
 npx cv-pro@latest update-section <section> data.json
 npx cv-pro@latest open                   # open live page in browser

@@ -15,6 +15,7 @@ Claim a handle at cv.ha7ch.com, get a token, then paste one prompt into Claude C
 ```bash
 npx cv-pro@latest --help
 CV_TOKEN=cv_pat_... npx cv-pro@latest get
+CV_TOKEN=cv_pat_... npx cv-pro@latest get --variant=openai
 CV_TOKEN=cv_pat_... npx cv-pro@latest update resume.json
 CV_TOKEN=cv_pat_... npx cv-pro@latest update-section experience data.json
 CV_TOKEN=cv_pat_... npx cv-pro@latest open
