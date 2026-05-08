@@ -4,7 +4,8 @@ import { getResumeByUsername, getVariantsForAudiences } from "@/lib/resume-store
 import type { ResumeData } from "@/types/resume";
 
 type RouteParams = { username: string };
-// Precedence is company > role > focus > lang to prefer the most targeted audience match first.
+// Precedence is company > role > focus > lang because the broadest/highest-intent audience
+// hint should win before less-specific refinements when multiple params are present.
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
 /**
@@ -45,7 +46,7 @@ export async function GET(
   }
 
   const query = req.nextUrl.searchParams;
-  const variantValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(
+  const variantValues = VARIANT_PARAM_ORDER.map((param) => query.get(param)).filter(
     (value): value is string => value !== null && value.length > 0,
   );
   const variant = await resolveVariant(username, variantValues);
