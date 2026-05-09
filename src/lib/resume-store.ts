@@ -71,6 +71,35 @@ export async function getVariantByAudience(username: string, audience: string): 
   return null;
 }
 
+export async function getVariantsForAudiences(
+  username: string,
+  audiences: string[],
+): Promise<Map<string, ResumeData>> {
+  "use cache";
+  const uniqueAudiences = [...new Set(audiences.filter((value) => value.length > 0))];
+  if (uniqueAudiences.length === 0) return new Map();
+  for (const audience of uniqueAudiences) cacheTag("variant", `${username}:${audience}`);
+  cacheLife("hours");
+  try {
+    const { data, error } = await supabaseAnon
+      .from("cv_variants")
+      .select("audience, data")
+      .eq("username", username)
+      .in("audience", uniqueAudiences);
+
+    if (error) console.warn("[resume-store] variants read failed:", error.message);
+
+    const variants = new Map<string, ResumeData>();
+    for (const row of data ?? []) {
+      if (row.data) variants.set(row.audience, normalizeResume(row.data, username));
+    }
+    return variants;
+  } catch (err) {
+    console.warn("[resume-store] variants unreachable:", err);
+  }
+  return new Map();
+}
+
 export async function upsertVariant(username: string, audience: string, data: ResumeData): Promise<ResumeData> {
   const next: ResumeData = {
     ...data,

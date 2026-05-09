@@ -4,6 +4,7 @@ import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
 import { register, whoami, getResume, putResume, patchSection, getSchema, listVariants, getVariant, putVariant, deleteVariant } from "./api.js";
 
 const VERSION = "0.5.0";
+const VARIANT_FLAG = "--variant=";
 
 function printVariantReminder(apiBase: string, handle: string | undefined) {
   if (!handle) return;
@@ -33,7 +34,7 @@ COMMANDS
   logout                      Remove saved credentials
   whoami                      Show authenticated handle
   schema                      Show resume schema (section names + field shapes)
-  get                         Print current resume as JSON
+  get [--variant=<key>]       Print current resume (or one variant) as JSON
   update [file]               Replace entire resume from a JSON file (or stdin)
   update-section <section>    Update one section from JSON file (or stdin)
   variants                    List all stored variants with links
@@ -52,6 +53,7 @@ EXAMPLES
   cv-pro register lawted
   cv-pro whoami
   cv-pro get
+  cv-pro get --variant=openai
   cv-pro update resume.json
   cv-pro update-section experience experience.json
   echo '{"name":"Lawted"}' | cv update-section header
@@ -162,8 +164,10 @@ async function main() {
   }
 
   if (cmd === "get") {
-    const resume = await getResume(config);
-    console.log(JSON.stringify(resume, null, 2));
+    const variantArg = args.find((arg) => arg.startsWith(VARIANT_FLAG));
+    const variantKey = variantArg?.slice(VARIANT_FLAG.length);
+    const data = variantKey ? await getVariant(config, variantKey) : await getResume(config);
+    console.log(JSON.stringify(data, null, 2));
     return;
   }
 
@@ -191,8 +195,8 @@ async function main() {
 
   if (cmd === "open") {
     const wantJson = args.slice(1).includes("--json");
-    const variantArg = args.slice(1).find(a => a.startsWith("--variant="));
-    const variantKey = variantArg?.slice("--variant=".length);
+    const variantArg = args.slice(1).find((arg) => arg.startsWith(VARIANT_FLAG));
+    const variantKey = variantArg?.slice(VARIANT_FLAG.length);
 
     let url: string;
     if (variantKey) {
