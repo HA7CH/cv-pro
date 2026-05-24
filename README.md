@@ -6,9 +6,10 @@ Claim a handle at cv.ha7ch.com, get a token, then paste one prompt into Claude C
 
 ## How it works
 
-1. Register at [cv.ha7ch.com](https://cv.ha7ch.com) → get a token
-2. Paste the generated prompt into Claude Code (CLI tab) or configure MCP directly
-3. Drop a PDF, paste text, or describe changes — Claude figures out the rest
+1. **Create your online CV** — claim a handle at [cv.ha7ch.com](https://cv.ha7ch.com)
+2. **Save your token** — copy the `cv_pat_...` token shown after claiming
+3. **Update your resume** — paste the generated prompt into Claude Code (CLI tab) or configure MCP directly; drop a PDF, paste text, or describe changes
+4. **View your dashboard** (optional) — see your targeted variants at `cv.ha7ch.com/{handle}/dashboard`
 
 ## CLI (`npx @ha7ch/cv-pro@latest`)
 
@@ -30,14 +31,13 @@ claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \
   --header "Authorization: Bearer cv_pat_..."
 ```
 
-Tools: `get_resume` · `update_resume` · `update_section`
+Tools: `get_schema` · `get_resume` · `update_resume` · `update_section` · `list_variants` · `get_variant` · `set_variant` · `delete_variant`
 
 ## Repo layout
 
 ```
 cv/
 ├── cli/                    npm package cv-pro
-├── plugin/                 Claude Code plugin (marketplace)
 ├── src/
 │   ├── app/
 │   │   ├── api/mcp/        MCP HTTP server
@@ -52,7 +52,7 @@ cv/
 
 ```bash
 pnpm install
-cp .env.example .env.local   # fill NEXT_PUBLIC_SUPABASE_URL/ANON_KEY + PAT_HASH_SECRET
+cp .env.example .env.local   # fill NEXT_PUBLIC_SUPABASE_URL/ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (server-side writes), PAT_HASH_SECRET
 pnpm dev
 ```
 

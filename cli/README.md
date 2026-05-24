@@ -105,7 +105,7 @@ claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \
 }
 ```
 
-Tools: `get_resume` · `update_resume` · `update_section`
+Tools: `get_schema` · `get_resume` · `update_resume` · `update_section` · `list_variants` · `get_variant` · `set_variant` · `delete_variant`
 
 ## Troubleshooting
 
@@ -114,4 +114,4 @@ Tools: `get_resume` · `update_resume` · `update_section`
 ## Links
 
 - Site: [cv.ha7ch.com](https://cv.ha7ch.com)
-- Repo: [github.com/LAWTED/cv-pro](https://github.com/LAWTED/cv-pro)
+- Repo: [github.com/HA7CH/cv-pro](https://github.com/HA7CH/cv-pro)

@@ -65,10 +65,13 @@ function mcpJson(token: string): string {
   );
 }
 
-function buildCliPrompt(token: string): string {
+function buildCliPrompt(token: string, hasToken: boolean): string {
+  const loginLine = hasToken
+    ? `Run first: npx @ha7ch/cv-pro@latest login ${token}\n\n`
+    : `(Finish Step 1 first — your real login command will appear here automatically.)\n\n`;
   return (
     `Update my resume at cv.ha7ch.com.\n\n` +
-    `Run first: npx @ha7ch/cv-pro@latest login ${token}\n\n` +
+    loginLine +
     `Then help me update my resume — I'll give you a PDF, paste text, or describe changes.\n\n` +
     `After saving, ask if I have a job description. If yes, create a tailored variant for that company or role and give me the shareable link.`
   );
@@ -160,8 +163,9 @@ export default function RegisterFlow() {
     setTimeout(() => setCopied(null), 1500);
   }
 
+  const hasToken = !!result?.token;
   const tokenDisplay = result?.token ?? PLACEHOLDER_TOKEN;
-  const cliPrompt = buildCliPrompt(tokenDisplay);
+  const cliPrompt = buildCliPrompt(tokenDisplay, hasToken);
 
   const clientSelector = (
     <div className="flex items-center gap-0.5">
@@ -189,7 +193,7 @@ export default function RegisterFlow() {
     <div className="space-y-8">
       {/* Step 1 */}
       {result ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <h2 className="font-serif text-2xl tracking-tight">
             Step 1 · Create your online CV
           </h2>
@@ -212,15 +216,15 @@ export default function RegisterFlow() {
               }}
               className="h-10 rounded-md px-4 text-sm text-muted-foreground border border-input hover:text-foreground transition-colors w-full sm:w-auto"
             >
-              switch account
+              Switch account
             </button>
           </div>
           <p className="text-xs text-muted-foreground">Your resume is live. Share this link.</p>
         </div>
       ) : (
-        <form onSubmit={submit} className="space-y-4">
+        <form onSubmit={submit} className="space-y-3">
           <h2 className="font-serif text-2xl tracking-tight">
-            Step 1 · Create your online CV
+            {claimingOwn ? "Step 1 · Welcome back" : "Step 1 · Create your online CV"}
           </h2>
 
           <div className="space-y-2">
@@ -279,9 +283,13 @@ export default function RegisterFlow() {
       )}
 
       {/* Step 2 - Save your token */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <h3 className="font-serif text-2xl tracking-tight">
-          {claimingOwn && !result ? "Ho ho ho, welcome back" : "Step 2 · Save your token"}
+          {claimingOwn
+            ? result
+              ? "Step 2 · You're in"
+              : "Ho ho ho, welcome back"
+            : "Step 2 · Save your token"}
         </h3>
         {claimingOwn && !result ? (
           <>
@@ -371,7 +379,7 @@ export default function RegisterFlow() {
       </div>
 
       {/* Step 4 - Dashboard */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <h3 className="font-serif text-2xl tracking-tight">
           Step 4 · View your dashboard{" "}
           <span className="text-muted-foreground text-xl">(optional)</span>

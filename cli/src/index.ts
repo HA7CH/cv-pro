@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
 import { register, whoami, getResume, putResume, patchSection, getSchema, listVariants, getVariant, putVariant, deleteVariant } from "./api.js";
 
-const VERSION = "0.5.0";
+const pkg = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string };
+const VERSION = pkg.version;
 const VARIANT_FLAG = "--variant=";
 
 function printVariantReminder(apiBase: string, handle: string | undefined) {
@@ -23,7 +26,7 @@ function printVariantReminder(apiBase: string, handle: string | undefined) {
 }
 
 const HELP = `
-aicv — AI-native resume CLI  (cv.ha7ch.com)
+cv-pro — your resume as a living site  (cv.ha7ch.com)
 
 USAGE
   cv-pro <command> [options]
@@ -56,7 +59,7 @@ EXAMPLES
   cv-pro get --variant=openai
   cv-pro update resume.json
   cv-pro update-section experience experience.json
-  echo '{"name":"Lawted"}' | cv update-section header
+  echo '{"name":"Lawted"}' | cv-pro update-section header
   cv-pro set-variant openai resume_openai.json
   cv-pro variants
   cv-pro open --variant=openai
@@ -98,9 +101,9 @@ async function main() {
 
   // login
   if (cmd === "login") {
-    const token = args[1];
+    const token = args[1]?.trim();
     if (!token) {
-      die("Usage: cv login <token>\nGet a token at cv.ha7ch.com");
+      die("Usage: cv-pro login <token>\nGet a token at cv.ha7ch.com");
     }
     if (!token.startsWith("cv_pat_")) {
       die("Token must start with cv_pat_");
@@ -174,21 +177,23 @@ async function main() {
   if (cmd === "update") {
     const data = readJsonArg(args[1], "resume data");
     process.stdout.write("Updating resume… ");
-    await putResume(config, data);
-    console.log(`✓\nView at ${config.apiBase}/${config.handle}`);
-    printVariantReminder(config.apiBase, config.handle);
+    const saved = await putResume(config, data);
+    const handle = await resolveHandle(config, saved.username);
+    console.log(`✓\nView at ${config.apiBase}/${handle}`);
+    printVariantReminder(config.apiBase, handle);
     return;
   }
 
   if (cmd === "update-section") {
     const section = args[1];
-    if (!section) die("Usage: cv update-section <section> [file]");
+    if (!section) die("Usage: cv-pro update-section <section> [file]");
     const value = readJsonArg(args[2], `section '${section}'`);
     process.stdout.write(`Updating ${section}… `);
-    await patchSection(config, section, value);
-    console.log(`✓\nView at ${config.apiBase}/${config.handle}`);
+    const saved = await patchSection(config, section, value);
+    const handle = await resolveHandle(config, saved.username);
+    console.log(`✓\nView at ${config.apiBase}/${handle}`);
     if (section === "experience" || section === "projectsRecent" || section === "projectsDetailed") {
-      printVariantReminder(config.apiBase, config.handle);
+      printVariantReminder(config.apiBase, handle);
     }
     return;
   }
@@ -246,9 +251,10 @@ async function main() {
     if (!key) die("Usage: cv-pro set-variant <key> [file]");
     const data = readJsonArg(args[2], `variant '${key}'`);
     process.stdout.write(`Saving variant '${key}'… `);
-    await putVariant(config, key, data);
+    const saved = await putVariant(config, key, data);
+    const handle = await resolveHandle(config, saved.username);
     console.log(`✓`);
-    console.log(`View at ${config.apiBase}/${config.handle}?company=${key}`);
+    console.log(`View at ${config.apiBase}/${handle}?company=${key}`);
     console.log(`(Also works with ?role=${key} or ?lang=${key})`);
     return;
   }
@@ -265,6 +271,17 @@ async function main() {
   die(`Unknown command: ${cmd}\nRun 'cv-pro help' to see available commands.`);
 }
 
+async function resolveHandle(
+  cfg: { token: string; apiBase: string; handle?: string },
+  fromResponse?: string,
+): Promise<string> {
+  if (cfg.handle) return cfg.handle;
+  if (fromResponse) return fromResponse;
+  const result = await whoami(cfg);
+  if (result.ok) return result.username;
+  die("Could not determine handle. Set CV_HANDLE or run 'cv-pro login <token>'.");
+}
+
 function readJsonArg(filePath: string | undefined, label: string): unknown {
   if (filePath) {
     try {
@@ -273,7 +290,11 @@ function readJsonArg(filePath: string | undefined, label: string): unknown {
       die(`Could not read ${label} from file: ${filePath}`);
     }
   }
-  // try stdin
+  // try stdin, but only if it's actually piped — otherwise readFileSync("/dev/stdin")
+  // blocks the terminal forever waiting for input
+  if (process.stdin.isTTY) {
+    die(`Provide ${label} as a file path or pipe JSON via stdin.`);
+  }
   try {
     const stdin = readFileSync("/dev/stdin", "utf8").trim();
     if (stdin) return JSON.parse(stdin);

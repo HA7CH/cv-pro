@@ -9,8 +9,37 @@ interface ServerError {
   allowed?: string[];
 }
 
+async function parseJson<T = unknown>(res: Response): Promise<T> {
+  const ct = res.headers.get("content-type") ?? "";
+  const raw = await res.text().catch(() => "");
+  if (!ct.toLowerCase().includes("json")) {
+    throw new Error(
+      `Server returned non-JSON (status ${res.status}): ${raw.slice(0, 200)}`,
+    );
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    throw new Error(
+      `Server returned non-JSON (status ${res.status}): ${raw.slice(0, 200)}`,
+    );
+  }
+}
+
 async function throwServerError(res: Response): Promise<never> {
-  const body = (await res.json().catch(() => ({}))) as ServerError;
+  const ct = res.headers.get("content-type") ?? "";
+  const raw = await res.text().catch(() => "");
+  if (!ct.toLowerCase().includes("json")) {
+    throw new Error(
+      `Server returned non-JSON (status ${res.status}): ${raw.slice(0, 200)}`,
+    );
+  }
+  let body: ServerError = {};
+  try {
+    body = JSON.parse(raw) as ServerError;
+  } catch {
+    // fall through with empty body
+  }
   let msg = body.error ?? res.statusText;
   if (body.issues?.length) {
     msg +=
@@ -72,7 +101,7 @@ export async function register(
     body: JSON.stringify({ handle }),
   });
   checkEgressBlock({ token: "", apiBase }, res);
-  const data = await res.json() as { handle?: string; token?: string; error?: string };
+  const data = await parseJson<{ handle?: string; token?: string; error?: string }>(res);
   if (!res.ok) throw new Error(data.error ?? res.statusText);
   return { handle: data.handle!, token: data.token! };
 }
@@ -88,64 +117,68 @@ export async function whoami(cfg: AuthConfig): Promise<WhoamiResult> {
     return { ok: false, reason: "unauthorized" };
   }
   if (!res.ok) return { ok: false, reason: "error" };
-  const data = await res.json();
+  const data = await parseJson<{ username: string }>(res);
   return { ok: true, username: data.username };
 }
 
 export async function getResume(cfg: AuthConfig) {
   const res = await req(cfg, "/api/v1/resume");
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson(res);
 }
 
-export async function putResume(cfg: AuthConfig, data: unknown) {
+export async function putResume(cfg: AuthConfig, data: unknown): Promise<{ username?: string }> {
   const res = await req(cfg, "/api/v1/resume", {
     method: "PUT",
     body: JSON.stringify(data),
   });
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson(res);
 }
 
 export async function patchSection(
   cfg: AuthConfig,
   section: string,
   value: unknown,
-) {
+): Promise<{ username?: string }> {
   const res = await req(cfg, "/api/v1/resume", {
     method: "PATCH",
     body: JSON.stringify({ section, value }),
   });
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson(res);
 }
 
 export async function getSchema(apiBase: string): Promise<{ json: unknown; text: string }> {
   const res = await fetch(`${apiBase}/api/v1/schema`);
   checkEgressBlock({ token: "", apiBase }, res);
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson<{ json: unknown; text: string }>(res);
 }
 
 export async function listVariants(cfg: AuthConfig): Promise<{ audience: string; updatedAt: string }[]> {
   const res = await req(cfg, "/api/v1/variants");
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson<{ audience: string; updatedAt: string }[]>(res);
 }
 
 export async function getVariant(cfg: AuthConfig, audience: string): Promise<unknown> {
   const res = await req(cfg, `/api/v1/variants/${encodeURIComponent(audience)}`);
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson(res);
 }
 
-export async function putVariant(cfg: AuthConfig, audience: string, data: unknown): Promise<unknown> {
+export async function putVariant(
+  cfg: AuthConfig,
+  audience: string,
+  data: unknown,
+): Promise<{ username?: string }> {
   const res = await req(cfg, `/api/v1/variants/${encodeURIComponent(audience)}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
   if (!res.ok) await throwServerError(res);
-  return res.json();
+  return parseJson<{ username?: string }>(res);
 }
 
 export async function deleteVariant(cfg: AuthConfig, audience: string): Promise<void> {
