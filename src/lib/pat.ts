@@ -1,6 +1,6 @@
 import "server-only";
 import { createHmac, randomBytes } from "node:crypto";
-import { supabaseAnon } from "@/lib/supabase/client";
+import { supabaseService } from "@/lib/supabase/server";
 
 const PAT_PREFIX = "cv_pat_";
 
@@ -22,7 +22,7 @@ export async function createPat(
 ): Promise<{ token: string; id: string }> {
   const token = generateRawToken();
   const tokenHash = hashToken(token);
-  const { data, error } = await supabaseAnon
+  const { data, error } = await supabaseService
     .from("cv_pat_tokens")
     .insert({ username, name, token_hash: tokenHash })
     .select("id")
@@ -38,14 +38,14 @@ export async function verifyPat(
 ): Promise<{ username: string } | null> {
   if (!rawToken?.startsWith(PAT_PREFIX)) return null;
   const tokenHash = hashToken(rawToken);
-  const { data, error } = await supabaseAnon
+  const { data, error } = await supabaseService
     .from("cv_pat_tokens")
     .select("id, username, revoked_at")
     .eq("token_hash", tokenHash)
     .maybeSingle();
   if (error || !data || data.revoked_at) return null;
 
-  void supabaseAnon
+  void supabaseService
     .from("cv_pat_tokens")
     .update({ last_used_at: new Date().toISOString() })
     .eq("id", data.id)

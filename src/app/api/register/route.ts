@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAnon } from "@/lib/supabase/client";
+import { supabaseService } from "@/lib/supabase/server";
 import { createPat } from "@/lib/pat";
 import type { ResumeData } from "@/types/resume";
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   if (err) return NextResponse.json({ error: err }, { status: 422 });
 
   // check uniqueness
-  const { data: existing } = await supabaseAnon
+  const { data: existing } = await supabaseService
     .from("cv_resumes")
     .select("username")
     .eq("username", handle)
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     meta: { updatedAt: new Date().toISOString() },
   };
 
-  const { error: insertErr } = await supabaseAnon.from("cv_resumes").insert({
+  const { error: insertErr } = await supabaseService.from("cv_resumes").insert({
     username: handle,
     data: resume,
     updated_at: resume.meta.updatedAt,

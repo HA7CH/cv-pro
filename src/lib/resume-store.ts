@@ -2,6 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag, revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabaseAnon } from "@/lib/supabase/client";
+import { supabaseService } from "@/lib/supabase/server";
 import {
   type ResumeData,
   contactLinkSchema,
@@ -40,7 +41,7 @@ export async function upsertResume(data: ResumeData): Promise<ResumeData> {
     meta: { updatedAt: new Date().toISOString() },
   };
 
-  const { error } = await supabaseAnon.from("cv_resumes").upsert(
+  const { error } = await supabaseService.from("cv_resumes").upsert(
     { username: data.username, data: next, updated_at: next.meta.updatedAt },
     { onConflict: "username" },
   );
@@ -106,7 +107,7 @@ export async function upsertVariant(username: string, audience: string, data: Re
     meta: { updatedAt: new Date().toISOString() },
   };
 
-  const { error } = await supabaseAnon.from("cv_variants").upsert(
+  const { error } = await supabaseService.from("cv_variants").upsert(
     { username, audience, data: next, updated_at: next.meta.updatedAt },
     { onConflict: "username,audience" },
   );
@@ -118,7 +119,7 @@ export async function upsertVariant(username: string, audience: string, data: Re
 }
 
 export async function deleteVariant(username: string, audience: string): Promise<void> {
-  const { error } = await supabaseAnon
+  const { error } = await supabaseService
     .from("cv_variants")
     .delete()
     .eq("username", username)

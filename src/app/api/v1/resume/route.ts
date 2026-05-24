@@ -10,10 +10,28 @@ import {
   SECTION_SCHEMAS,
 } from "@/types/resume";
 
+// 256 KB is comfortably larger than any realistic resume JSON; rejecting
+// upstream of req.json() keeps a malicious 10 MB payload from being buffered.
+const MAX_BODY_BYTES = 256 * 1024;
+
 async function auth(req: NextRequest) {
   const header = req.headers.get("authorization") ?? "";
   if (!header.toLowerCase().startsWith("bearer ")) return null;
   return verifyPat(header.slice(7).trim());
+}
+
+function checkBodySize(req: NextRequest): NextResponse | null {
+  const lenHeader = req.headers.get("content-length");
+  if (lenHeader) {
+    const len = Number(lenHeader);
+    if (Number.isFinite(len) && len > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: "Payload too large" },
+        { status: 413 },
+      );
+    }
+  }
+  return null;
 }
 
 function issuesPayload(err: z.ZodError) {
@@ -39,6 +57,9 @@ export async function GET(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   const user = await auth(req);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const sizeErr = checkBodySize(req);
+  if (sizeErr) return sizeErr;
 
   let body: unknown;
   try {
@@ -69,6 +90,9 @@ export async function PUT(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const user = await auth(req);
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const sizeErr = checkBodySize(req);
+  if (sizeErr) return sizeErr;
 
   let body: { section?: unknown; value?: unknown };
   try {

@@ -119,6 +119,22 @@ export const TOOLS = [
 
 export type ToolName = (typeof TOOLS)[number]["name"];
 
+// Audience keys are user-supplied values that become DB keys + URL slugs.
+// Restrict to a conservative ASCII slug shape to keep them safe everywhere.
+const AUDIENCE_RE = /^[a-z0-9][a-z0-9-]{0,30}$/;
+
+// 256 KB ceiling on the serialized resume payload; anything larger is
+// almost certainly abuse rather than a real CV.
+const MAX_RESUME_PAYLOAD_BYTES = 256 * 1024;
+
+function payloadByteLength(data: unknown): number {
+  try {
+    return new TextEncoder().encode(JSON.stringify(data)).byteLength;
+  } catch {
+    return Number.POSITIVE_INFINITY;
+  }
+}
+
 interface ToolContext { username: string }
 
 export async function dispatchTool(
@@ -141,6 +157,9 @@ export async function dispatchTool(
       case "update_resume": {
         if (!args.data || typeof args.data !== "object") {
           return error("Missing 'data' object.");
+        }
+        if (payloadByteLength(args.data) > MAX_RESUME_PAYLOAD_BYTES) {
+          return error("Resume payload too large (limit 256 KB).");
         }
         const merged = {
           ...(args.data as Record<string, unknown>),
@@ -196,8 +215,11 @@ export async function dispatchTool(
       }
 
       case "get_variant": {
-        const audience = String(args.audience ?? "");
+        const audience = String(args.audience ?? "").toLowerCase().trim();
         if (!audience) return error("Missing 'audience'.");
+        if (!AUDIENCE_RE.test(audience)) {
+          return error("Invalid audience format.");
+        }
         const variant = await getVariantByAudience(ctx.username, audience);
         if (!variant) return error(`No variant found for '${audience}'.`);
         return text(JSON.stringify(variant, null, 2));
@@ -206,7 +228,13 @@ export async function dispatchTool(
       case "set_variant": {
         const audience = String(args.audience ?? "").toLowerCase().trim();
         if (!audience) return error("Missing 'audience'.");
+        if (!AUDIENCE_RE.test(audience)) {
+          return error("Invalid audience format. Use 1–31 chars: a–z, 0–9, hyphen (must start with a–z or 0–9).");
+        }
         if (!args.data || typeof args.data !== "object") return error("Missing 'data' object.");
+        if (payloadByteLength(args.data) > MAX_RESUME_PAYLOAD_BYTES) {
+          return error("Variant payload too large (limit 256 KB).");
+        }
         const merged = {
           ...(args.data as Record<string, unknown>),
           username: ctx.username,
@@ -224,8 +252,11 @@ export async function dispatchTool(
       }
 
       case "delete_variant": {
-        const audience = String(args.audience ?? "");
+        const audience = String(args.audience ?? "").toLowerCase().trim();
         if (!audience) return error("Missing 'audience'.");
+        if (!AUDIENCE_RE.test(audience)) {
+          return error("Invalid audience format.");
+        }
         await deleteVariant(ctx.username, audience);
         return text(`Variant '${audience}' deleted.`);
       }
