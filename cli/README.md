@@ -17,7 +17,7 @@ Follow these steps exactly, in order. No browser required.
 **Step 2 — Register and log in (one command)**
 
 ```bash
-npx cv-pro@latest register {handle}
+npx @ha7ch/cv-pro@latest register {handle}
 ```
 
 This claims the handle and saves the token automatically. Output: `Logged in as @{handle}`.
@@ -30,7 +30,7 @@ Ask: *Do you have a resume PDF or any content to publish now?*
 
 - **PDF** — read the file, extract all fields into JSON, save to `/tmp/resume.json`, then:
   ```bash
-  npx cv-pro@latest update /tmp/resume.json
+  npx @ha7ch/cv-pro@latest update /tmp/resume.json
   ```
 - **Text / paste** — same flow, extract from pasted content.
 - **Later** — skip. The page is already live with an empty template.
@@ -38,7 +38,7 @@ Ask: *Do you have a resume PDF or any content to publish now?*
 **Step 4 — Confirm**
 
 ```bash
-npx cv-pro@latest whoami
+npx @ha7ch/cv-pro@latest whoami
 ```
 
 Tell the user their live URL: **https://cv.ha7ch.com/{handle}**
@@ -52,15 +52,15 @@ Each `experience` and `projectsDetailed` entry takes a `bullets: string[]` field
 ## CLI reference
 
 ```bash
-npx cv-pro@latest register <handle>      # claim handle + auto-login (no browser)
-npx cv-pro@latest login cv_pat_...       # save an existing token
-npx cv-pro@latest whoami                 # show handle + page URL
-npx cv-pro@latest get                    # print current resume JSON
-npx cv-pro@latest get --variant=openai   # print one stored variant JSON
-npx cv-pro@latest update resume.json     # replace full resume
-npx cv-pro@latest update-section <section> data.json
-npx cv-pro@latest open                   # open live page in browser
-npx cv-pro@latest open --json            # open the public JSON view
+npx @ha7ch/cv-pro@latest register <handle>      # claim handle + auto-login (no browser)
+npx @ha7ch/cv-pro@latest login cv_pat_...       # save an existing token
+npx @ha7ch/cv-pro@latest whoami                 # show handle + page URL
+npx @ha7ch/cv-pro@latest get                    # print current resume JSON
+npx @ha7ch/cv-pro@latest get --variant=openai   # print one stored variant JSON
+npx @ha7ch/cv-pro@latest update resume.json     # replace full resume
+npx @ha7ch/cv-pro@latest update-section <section> data.json
+npx @ha7ch/cv-pro@latest open                   # open live page in browser
+npx @ha7ch/cv-pro@latest open --json            # open the public JSON view
 ```
 
 ## Public JSON URL

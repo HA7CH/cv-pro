@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   keywords: [
     "cv-pro", "AI resume", "living resume", "tailored resume",
     "resume URL", "resume per company", "resume CLI", "resume MCP",
-    "AI-native resume", "npx cv-pro",
+    "AI-native resume", "npx @ha7ch/cv-pro",
   ],
 };
 

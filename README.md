@@ -10,18 +10,18 @@ Claim a handle at cv.ha7ch.com, get a token, then paste one prompt into Claude C
 2. Paste the generated prompt into Claude Code (CLI tab) or configure MCP directly
 3. Drop a PDF, paste text, or describe changes — Claude figures out the rest
 
-## CLI (`npx cv-pro@latest`)
+## CLI (`npx @ha7ch/cv-pro@latest`)
 
 ```bash
-npx cv-pro@latest --help
-CV_TOKEN=cv_pat_... npx cv-pro@latest get
-CV_TOKEN=cv_pat_... npx cv-pro@latest get --variant=openai
-CV_TOKEN=cv_pat_... npx cv-pro@latest update resume.json
-CV_TOKEN=cv_pat_... npx cv-pro@latest update-section experience data.json
-CV_TOKEN=cv_pat_... npx cv-pro@latest open
+npx @ha7ch/cv-pro@latest --help
+CV_TOKEN=cv_pat_... npx @ha7ch/cv-pro@latest get
+CV_TOKEN=cv_pat_... npx @ha7ch/cv-pro@latest get --variant=openai
+CV_TOKEN=cv_pat_... npx @ha7ch/cv-pro@latest update resume.json
+CV_TOKEN=cv_pat_... npx @ha7ch/cv-pro@latest update-section experience data.json
+CV_TOKEN=cv_pat_... npx @ha7ch/cv-pro@latest open
 ```
 
-npm: [`cv-pro`](https://www.npmjs.com/package/cv-pro)
+npm: [`@ha7ch/cv-pro`](https://www.npmjs.com/package/@ha7ch/cv-pro)
 
 ## MCP (direct)
 

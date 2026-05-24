@@ -68,7 +68,7 @@ function mcpJson(token: string): string {
 function buildCliPrompt(token: string): string {
   return (
     `Update my resume at cv.ha7ch.com.\n\n` +
-    `Run first: npx cv-pro@latest login ${token}\n\n` +
+    `Run first: npx @ha7ch/cv-pro@latest login ${token}\n\n` +
     `Then help me update my resume — I'll give you a PDF, paste text, or describe changes.\n\n` +
     `After saving, ask if I have a job description. If yes, create a tailored variant for that company or role and give me the shareable link.`
   );
