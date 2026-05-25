@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Montserrat, Geist, Noto_Serif_SC, Cookie } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { Analytics } from '@vercel/analytics/next';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -66,6 +67,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-white text-zinc-900 font-sans">
         {children}
+        <Analytics />
       </body>
     </html>
   );
