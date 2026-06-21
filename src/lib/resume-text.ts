@@ -50,7 +50,7 @@ export function resumeToText(data: ResumeData): string {
     section("Projects");
     for (const p of data.projectsDetailed) {
       const head = [p.title, p.type].filter(Boolean).join(" — ");
-      const range = p.endDate ? formatRange(p.startDate, p.endDate) : p.startDate;
+      const range = p.endDate ? formatRange(p.startDate, p.endDate) : formatMonth(p.startDate);
       lines.push("", titleWithRange(head, range));
       if (p.award) lines.push(p.award);
       if (p.url) lines.push(p.url);
@@ -78,9 +78,24 @@ function titleWithRange(title: string, range: string): string {
   return range ? `${title}   (${range})` : title;
 }
 
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
 function formatRange(start: string, end: string): string {
   if (!start && !end) return "";
-  if (!end) return start;
-  if (!start) return end;
-  return `${start} - ${end}`;
+  const s = formatMonth(start);
+  if (!end) return s ? `${s} - Present` : "Present";
+  if (!start) return formatMonth(end);
+  return `${s} - ${formatMonth(end)}`;
+}
+
+// "2026-09" → "Sep 2026". Leaves non-ISO values (free text, year-only) untouched.
+function formatMonth(value: string): string {
+  const m = /^(\d{4})-(\d{2})/.exec(value);
+  if (!m) return value;
+  const idx = parseInt(m[2], 10) - 1;
+  if (idx < 0 || idx > 11) return value;
+  return `${MONTHS[idx]} ${m[1]}`;
 }
