@@ -176,4 +176,9 @@
     orphans: 3;
     widows: 3;
   }
+  /* The last section's bottom margin would otherwise spill past the page edge
+     and emit a blank trailing page. Nothing follows it, so drop it. */
+  main > section:last-of-type {
+    margin-bottom: 0 !important;
+  }
 }

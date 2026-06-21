@@ -27,15 +27,15 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
     : "[font-family:var(--font-montserrat)]";
 
   // Screen values stay comfortable; print: variants tighten spacing/size so the PDF
-  // packs denser (closer to one page) without ever dropping bullets.
+  // packs onto one page without ever dropping bullets.
   return (
     <main className={`mx-auto max-w-3xl px-10 py-16 print:py-0 ${bodyFont} text-zinc-900`}>
       <header>
-        <h1 className="font-serif text-center text-5xl print:text-4xl font-bold tracking-tight">
+        <h1 className="font-serif text-center text-5xl print:text-3xl font-bold tracking-tight print:tracking-normal">
           {data.header.name}
         </h1>
         {headerLinks.length > 0 && (
-          <div className="mt-5 print:mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[13px] text-zinc-600">
+          <div className="mt-5 print:mt-1.5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[13px] text-zinc-600">
             {headerLinks.map((l, i) => (
               <span key={i} className="flex items-center gap-x-5">
                 {i > 0 && <span className="text-zinc-300" aria-hidden>|</span>}
@@ -52,7 +52,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
         )}
       </header>
 
-      <hr className="mt-6 mb-8 print:mt-4 print:mb-5 border-zinc-200" />
+      <hr className="mt-6 mb-8 print:mt-2 print:mb-3 border-zinc-200" />
 
       {data.education.length > 0 && (
         <Section title="Education" italic={isCJK}>
@@ -61,7 +61,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
               key={i}
               title={e.school}
               dateRange={formatRange(e.startDate, e.endDate)}
-              subtitle={[e.degree, e.major].filter(Boolean).join(", ")}
+              subtitle={dedupeDegree(e.degree, e.major)}
             />
           ))}
         </Section>
@@ -107,7 +107,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
 
       {data.skills.length > 0 && (
         <Section title="Skills" italic={isCJK}>
-          <div className="grid grid-cols-1 gap-x-12 gap-y-4 print:gap-y-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-12 gap-y-4 print:gap-y-1 sm:grid-cols-2">
             {data.skills.map((cat) => (
               <div key={cat.name} className="break-inside-avoid text-[13px] leading-relaxed print:leading-snug">
                 <div className="font-semibold">{cat.name}:</div>
@@ -139,8 +139,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-10 print:mb-6">
-      <h2 className={`break-after-avoid font-serif text-3xl print:text-2xl mb-4 print:mb-2 ${italic ? "italic" : ""}`}>{title}</h2>
+    <section className="mb-10 print:mb-4">
+      <h2 className={`break-after-avoid font-serif text-3xl print:text-xl mb-4 print:mb-1 ${italic ? "italic" : ""}`}>{title}</h2>
       {children}
     </section>
   );
@@ -175,7 +175,7 @@ function Entry({
   );
 
   return (
-    <div className="break-inside-avoid mb-5 print:mb-3 last:mb-0">
+    <div className="break-inside-avoid mb-5 print:mb-2 last:mb-0">
       <div className="flex items-baseline justify-between gap-4">
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-0.5 text-[14px] print:text-[13px]">
           {titleEl}
@@ -187,10 +187,10 @@ function Entry({
       </div>
       {subtitle && <div className="mt-0.5 text-[13px] print:text-[12px] text-zinc-600">{subtitle}</div>}
       {bullets && bullets.length > 0 && (
-        <ul className="mt-1.5 print:mt-1 space-y-0.5 print:space-y-0 text-[13px] print:text-[12px] leading-relaxed print:leading-snug text-zinc-700">
+        <ul className="mt-1.5 print:mt-0 space-y-0.5 print:space-y-0 text-[13px] print:text-[11px] leading-relaxed print:leading-tight text-zinc-700">
           {bullets.map((b, i) => (
             <li key={i} className="flex gap-2.5">
-              <span className="select-none text-zinc-500 leading-relaxed print:leading-snug" aria-hidden>•</span>
+              <span className="select-none text-zinc-500 leading-relaxed print:leading-tight" aria-hidden>•</span>
               <span>{b}</span>
             </li>
           ))}
@@ -204,8 +204,9 @@ function formatRange(start: string, end: string): string {
   if (!start && !end) return "";
   const s = formatMonth(start);
   if (!end) return s ? `${s} — Present` : "Present";
-  if (!start) return formatMonth(end);
-  return `${s} — ${formatMonth(end)}`;
+  const e = isFuture(end) ? `Expected ${formatMonth(end)}` : formatMonth(end);
+  if (!start) return e;
+  return `${s} — ${e}`;
 }
 
 // "2026-09" → "Sep 2026". Leaves non-ISO values (free text, year-only) untouched.
@@ -215,6 +216,25 @@ function formatMonth(value: string): string {
   const idx = parseInt(m[2], 10) - 1;
   if (idx < 0 || idx > 11) return value;
   return `${MONTHS[idx]} ${m[1]}`;
+}
+
+// True when an ISO year-month is later than the current month — used to prefix
+// in-progress degrees with "Expected".
+function isFuture(value: string): boolean {
+  const m = /^(\d{4})-(\d{2})/.exec(value);
+  if (!m) return false;
+  const target = parseInt(m[1], 10) * 12 + (parseInt(m[2], 10) - 1);
+  const now = new Date();
+  return target > now.getFullYear() * 12 + now.getMonth();
+}
+
+// Drop the major when the degree text already contains it, e.g.
+// "Master in Design Engineering (MDE)" + "Design Engineering" → just the degree.
+function dedupeDegree(degree: string, major: string): string {
+  if (!major) return degree;
+  if (!degree) return major;
+  if (degree.toLowerCase().includes(major.toLowerCase())) return degree;
+  return `${degree}, ${major}`;
 }
 
 function prettyUrl(url: string): string {
