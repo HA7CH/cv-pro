@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
         source: "/:username([a-z0-9][a-z0-9-]{0,29}).json",
         destination: "/api/public/:username",
       },
+      {
+        source: "/:username([a-z0-9][a-z0-9-]{0,29}).txt",
+        destination: "/api/public/:username/txt",
+      },
     ];
   },
 };

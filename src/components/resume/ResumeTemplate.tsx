@@ -38,9 +38,6 @@ export default function ResumeTemplate({
         <h1 className={`font-serif text-center ${compact ? "text-4xl" : "text-5xl"} font-bold tracking-tight`}>
           {data.header.name}
         </h1>
-        {data.header.tagline && (
-          <p className="mt-2 text-center text-sm text-zinc-500">{data.header.tagline}</p>
-        )}
         {headerLinks.length > 0 && (
           <div className={`${compact ? "mt-3" : "mt-5"} flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[13px] text-zinc-600`}>
             {headerLinks.map((l, i) => (
@@ -120,7 +117,7 @@ export default function ResumeTemplate({
         <Section title="Skills" italic={isCJK} compact={compact}>
           <div className={`grid grid-cols-1 ${compact ? "gap-x-10 gap-y-2" : "gap-x-12 gap-y-4"} sm:grid-cols-2`}>
             {data.skills.map((cat) => (
-              <div key={cat.name} className={compact ? "text-[12px] leading-snug" : "text-[13px] leading-relaxed"}>
+              <div key={cat.name} className={`break-inside-avoid ${compact ? "text-[12px] leading-snug" : "text-[13px] leading-relaxed"}`}>
                 <div className="font-semibold">{cat.name}:</div>
                 <div className="text-zinc-700">{cat.items.join(", ")}</div>
               </div>
@@ -153,7 +150,7 @@ function Section({
 }) {
   return (
     <section className={compact ? "mb-6" : "mb-10"}>
-      <h2 className={`font-serif ${compact ? "text-2xl mb-2" : "text-3xl mb-4"} ${italic ? "italic" : ""}`}>{title}</h2>
+      <h2 className={`break-after-avoid font-serif ${compact ? "text-2xl mb-2" : "text-3xl mb-4"} ${italic ? "italic" : ""}`}>{title}</h2>
       {children}
     </section>
   );
@@ -193,7 +190,7 @@ function Entry({
   const titleText = compact ? "text-[13px]" : "text-[14px]";
 
   return (
-    <div className={`${compact ? "mb-3" : "mb-5"} last:mb-0`}>
+    <div className={`break-inside-avoid ${compact ? "mb-3" : "mb-5"} last:mb-0`}>
       <div className="flex items-baseline justify-between gap-4">
         <div className={`flex flex-wrap items-baseline gap-x-4 gap-y-0.5 ${titleText}`}>
           {titleEl}

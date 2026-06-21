@@ -165,4 +165,15 @@
     color: inherit !important;
     text-decoration: none !important;
   }
+  /* Pagination quality: never split a single entry across a page boundary,
+     never strand a section heading at the foot of a page, and keep at least
+     two lines of a bullet list together. The component-level break-* utilities
+     are the primary control; these are the backstop. */
+  h2 {
+    break-after: avoid;
+  }
+  p, li {
+    orphans: 3;
+    widows: 3;
+  }
 }

@@ -187,3 +187,20 @@ export async function deleteVariant(cfg: AuthConfig, audience: string): Promise<
   });
   if (!res.ok) await throwServerError(res);
 }
+
+// Plain-text resume is public (served at /:handle.txt), so no auth is needed —
+// just the handle. A variant key maps onto ?company= (the highest-precedence
+// variant param, which also resolves ?role=/?lang= keys server-side).
+export async function getResumeText(
+  apiBase: string,
+  handle: string,
+  variant?: string,
+): Promise<string> {
+  const query = variant ? `?company=${encodeURIComponent(variant)}` : "";
+  const res = await fetch(`${apiBase}/${handle}.txt${query}`);
+  checkEgressBlock({ token: "", apiBase }, res);
+  if (!res.ok) {
+    throw new Error(`Could not fetch text resume (status ${res.status})`);
+  }
+  return res.text();
+}

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolvePublicResume } from "@/lib/resume-public";
+import { resumeToText } from "@/lib/resume-text";
 
 type RouteParams = { username: string };
+
+const TEXT_HEADERS = { "Content-Type": "text/plain; charset=utf-8" } as const;
 
 export async function GET(
   req: NextRequest,
@@ -10,11 +13,17 @@ export async function GET(
   const { username } = await params;
   const resume = await resolvePublicResume(username, req.nextUrl.searchParams);
   if (!resume) {
-    return NextResponse.json({ error: "not_found", username }, { status: 404 });
+    return new NextResponse(`Resume not found: ${username}\n`, {
+      status: 404,
+      headers: TEXT_HEADERS,
+    });
   }
 
-  return NextResponse.json(resume, {
+  return new NextResponse(resumeToText(resume), {
     headers: {
+      ...TEXT_HEADERS,
+      // Served inline like /:username.json; the on-page button forces a download.
+      "Content-Disposition": `inline; filename="${username}.txt"`,
       "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       "Access-Control-Allow-Origin": "*",
     },

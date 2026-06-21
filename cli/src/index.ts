@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
-import { register, whoami, getResume, putResume, patchSection, getSchema, listVariants, getVariant, putVariant, deleteVariant } from "./api.js";
+import { register, whoami, getResume, putResume, patchSection, getSchema, listVariants, getVariant, putVariant, deleteVariant, getResumeText } from "./api.js";
 
 const pkg = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -38,6 +38,8 @@ COMMANDS
   whoami                      Show authenticated handle
   schema                      Show resume schema (section names + field shapes)
   get [--variant=<key>]       Print current resume (or one variant) as JSON
+  export [--txt|--json]       Save resume as plain text (default) or JSON
+          [--variant=<key>] [-o <file>]
   update [file]               Replace entire resume from a JSON file (or stdin)
   update-section <section>    Update one section from JSON file (or stdin)
   variants                    List all stored variants with links
@@ -57,6 +59,8 @@ EXAMPLES
   cv-pro whoami
   cv-pro get
   cv-pro get --variant=openai
+  cv-pro export -o resume.txt
+  cv-pro export --json --variant=openai -o resume_openai.json
   cv-pro update resume.json
   cv-pro update-section experience experience.json
   echo '{"name":"Lawted"}' | cv-pro update-section header
@@ -171,6 +175,35 @@ async function main() {
     const variantKey = variantArg?.slice(VARIANT_FLAG.length);
     const data = variantKey ? await getVariant(config, variantKey) : await getResume(config);
     console.log(JSON.stringify(data, null, 2));
+    return;
+  }
+
+  if (cmd === "export") {
+    const rest = args.slice(1);
+    const wantJson = rest.includes("--json");
+    const variantArg = rest.find((arg) => arg.startsWith(VARIANT_FLAG));
+    const variantKey = variantArg?.slice(VARIANT_FLAG.length);
+    const outIdx = rest.findIndex((arg) => arg === "-o" || arg === "--out");
+    const outFile = outIdx >= 0 ? rest[outIdx + 1] : undefined;
+    if (outIdx >= 0 && !outFile) {
+      die("Usage: cv-pro export [--txt|--json] [--variant=<key>] [-o <file>]");
+    }
+    const handle = await resolveHandle(config);
+
+    let content: string;
+    if (wantJson) {
+      const data = variantKey ? await getVariant(config, variantKey) : await getResume(config);
+      content = JSON.stringify(data, null, 2) + "\n";
+    } else {
+      content = await getResumeText(config.apiBase, handle, variantKey);
+    }
+
+    if (outFile) {
+      writeFileSync(outFile, content);
+      console.log(`Saved ${outFile}`);
+    } else {
+      process.stdout.write(content);
+    }
     return;
   }
 
